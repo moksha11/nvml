@@ -45,7 +45,7 @@ vpath %.c $(COMMON)
 
 INCS += -I../include -I../common/
 
-CFLAGS += -std=gnu99 -Wall -Werror -pthread $(EXTRA_CFLAGS)
+CFLAGS += -std=gnu99 -Wall -Werror -pthread $(EXTRA_CFLAGS) -D_DISABLE_LOGGING
 CFLAGS += -DSRCVERSION=\"$(SRCVERSION)\"
 
 LDFLAGS += -Wl,-z,relro $(EXTRA_LDFLAGS)
@@ -81,7 +81,8 @@ CFLAGS += -O0 -ggdb -DDEBUG
 LIBS_DIR = nvml_debug
 OBJDIR = debug
 else
-CFLAGS += -O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2
+#CFLAGS += -O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2
+CFLAGS += -O0 -ggdb -DDEBUG
 LIBS_DIR =
 OBJDIR = nondebug
 endif

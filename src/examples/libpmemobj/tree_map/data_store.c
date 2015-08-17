@@ -43,23 +43,40 @@
 #include <assert.h>
 #include "tree_map.h"
 
+#define TEST_RESTART
+
 POBJ_LAYOUT_BEGIN(data_store);
 POBJ_LAYOUT_ROOT(data_store, struct store_root);
 POBJ_LAYOUT_TOID(data_store, struct store_item);
 POBJ_LAYOUT_END(data_store);
 
-#define	MAX_INSERTS 500
+#define	MAX_INSERTS 500000
+#define ELEMENTSZ 512
 
 static uint64_t nkeys;
 static uint64_t keys[MAX_INSERTS];
 
 struct store_item {
-	uint64_t item_data;
+	uint8_t item_data[ELEMENTSZ];
 };
 
 struct store_root {
 	TOID(struct tree_map) map;
 };
+
+void gen_random(char *s, const int len) {
+	static const char alphanum[] =
+			"0123456789"
+			"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			"abcdefghijklmnopqrstuvwxyz";
+
+	for (int i = 0; i < len; ++i) {
+		s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+	}
+
+	s[len] = 0;
+}
+
 
 /*
  * new_store_item -- transactionally creates and initializes new item
@@ -67,8 +84,11 @@ struct store_root {
 TOID(struct store_item)
 new_store_item()
 {
+	char buf[ELEMENTSZ];
+	gen_random(buf, ELEMENTSZ);
 	TOID(struct store_item) item = TX_NEW(struct store_item);
-	D_RW(item)->item_data = rand();
+	//D_RW(item)->item_data = rand();
+	 memcpy(D_RW(item)->item_data, buf, ELEMENTSZ);
 
 	return item;
 }
@@ -108,18 +128,29 @@ int main(int argc, const char *argv[]) {
 	if (access(path, F_OK) != 0) {
 		if ((pop = pmemobj_create(path, POBJ_LAYOUT_NAME(data_store),
 			PMEMOBJ_MIN_POOL, 0666)) == NULL) {
-			perror("failed to create pool\n");
+			fprintf(stderr,"failed to create pool %s\n", path);
 			return 1;
 		}
+		//return 0;
 	} else {
 		if ((pop = pmemobj_open(path,
 				POBJ_LAYOUT_NAME(data_store))) == NULL) {
-			perror("failed to open pool\n");
+			fprintf(stderr,"failed to open pool %s\n", path);
 			return 1;
 		}
+#ifdef TEST_RESTART
+		TOID(struct store_root) root = POBJ_ROOT(pop, struct store_root);
+		/* count the items */
+		if (!TOID_IS_NULL(D_RO(root)->map)){
+			tree_map_foreach(D_RO(root)->map, get_keys, NULL);
+			exit(0);
+		}
+#endif
 	}
 
 	TOID(struct store_root) root = POBJ_ROOT(pop, struct store_root);
+
+
 	if (!TOID_IS_NULL(D_RO(root)->map)) /* delete the map if it exists */
 		tree_map_delete(pop, &D_RW(root)->map);
 
@@ -138,6 +169,7 @@ int main(int argc, const char *argv[]) {
 	/* count the items */
 	tree_map_foreach(D_RO(root)->map, get_keys, NULL);
 
+#ifndef TEST_RESTART
 	/* remove the items without outer transaction */
 	for (int i = 0; i < nkeys; ++i) {
 		PMEMoid item = tree_map_remove(pop, D_RO(root)->map, keys[i]);
@@ -151,6 +183,7 @@ int main(int argc, const char *argv[]) {
 	/* tree should be empty */
 	tree_map_foreach(D_RO(root)->map, dec_keys, NULL);
 	assert(old_nkeys == nkeys);
+#endif //TEST_RESTART
 
 	pmemobj_close(pop);
 

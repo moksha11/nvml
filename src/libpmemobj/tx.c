@@ -41,6 +41,7 @@
 #include <sys/queue.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "libpmem.h"
 #include "libpmemobj.h"
@@ -167,6 +168,8 @@ constructor_tx_zalloc(PMEMobjpool *pop, void *ptr, void *arg)
 static void
 constructor_tx_add_range(PMEMobjpool *pop, void *ptr, void *arg)
 {
+#ifdef _DISABLE_LOGGING
+#else
 	LOG(3, NULL);
 
 	ASSERTne(ptr, NULL);
@@ -196,6 +199,7 @@ constructor_tx_add_range(PMEMobjpool *pop, void *ptr, void *arg)
 
 	/* do not report changes to the original object */
 	VALGRIND_ADD_TO_TX(src, args->size);
+#endif
 }
 
 /*
@@ -285,7 +289,8 @@ static int
 tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 {
 	LOG(3, NULL);
-
+#ifdef _DISABLE_LOGGING
+#else
 	int ret;
 	PMEMoid obj;
 	while (!OBJ_LIST_EMPTY(head)) {
@@ -309,6 +314,7 @@ tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 			return ret;
 		}
 	}
+#endif
 
 	return 0;
 }
@@ -515,6 +521,8 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
 
+#ifdef _DISABLE_LOGGING
+#else
 	PMEMoid iter;
 	for (iter = layout->undo_alloc.pe_first; !OBJ_OID_IS_NULL(iter);
 		iter = oob_list_next(pop,
@@ -542,6 +550,7 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 		/* flush and persist the whole allocated area and oob header */
 		pop->persist(oobh, size);
 	}
+#endif
 }
 
 /*
@@ -553,6 +562,8 @@ tx_pre_commit_set(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
 
+#ifdef _DISABLE_LOGGING
+#else
 	PMEMoid iter;
 	for (iter = layout->undo_set.pe_first; !OBJ_OID_IS_NULL(iter);
 		iter = oob_list_next(pop, &layout->undo_set, iter)) {
@@ -563,6 +574,7 @@ tx_pre_commit_set(PMEMobjpool *pop, struct lane_tx_layout *layout)
 		/* flush and persist modified area */
 		pop->persist(ptr, range->size);
 	}
+#endif
 }
 
 /*
@@ -574,6 +586,8 @@ tx_post_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
 
+#ifdef _DISABLE_LOGGING
+#else
 	PMEMoid obj;
 	int ret;
 	while (!OBJ_LIST_EMPTY(&layout->undo_alloc)) {
@@ -595,7 +609,7 @@ tx_post_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 			return ret;
 		}
 	}
-
+#endif
 	return 0;
 }
 
@@ -1236,6 +1250,12 @@ pmemobj_tx_add_common(struct tx_add_range_args *args)
 int
 pmemobj_tx_add_range_direct(void *ptr, size_t size)
 {
+
+#if _DISABLE_LOGGING
+	//printf("disabling logging\n");
+	return 0;
+#endif
+
 	LOG(3, NULL);
 
 	if (tx.stage != TX_STAGE_WORK) {
@@ -1261,6 +1281,11 @@ pmemobj_tx_add_range_direct(void *ptr, size_t size)
 int
 pmemobj_tx_add_range(PMEMoid oid, uint64_t hoff, size_t size)
 {
+#ifdef _DISABLE_LOGGING
+	printf("disabling logging\n");
+	return 0;
+#endif
+
 	LOG(3, NULL);
 
 	if (tx.stage != TX_STAGE_WORK) {

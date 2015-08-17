@@ -459,11 +459,11 @@ pmem_msync(void *addr, size_t len)
 
 	/* round addr down to page boundary */
 	uintptr_t uptr = (uintptr_t)addr & ~(Pagesize - 1);
-
-	int ret;
+	int ret=0;
+#ifndef _DISABLE_LOGGING
 	if ((ret = msync((void *)uptr, len, MS_SYNC)) < 0)
 		ERR("!msync");
-
+#endif
 	/* full flush, commit */
 	VALGRIND_DO_PERSIST(uptr, len);
 

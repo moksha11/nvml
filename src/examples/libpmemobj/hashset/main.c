@@ -149,65 +149,60 @@ unknown_command(const char *str)
 }
 
 
-
 #define	INPUT_BUF_LEN 1000
 
+void gen_insert_val(char *key, int val, char op) {
 
-void gen_insert_val(char *key, int val) {
-
-		char tmp[INPUT_BUF_LEN];
-		bzero(key, INPUT_BUF_LEN);
-		strcpy(key, "i");
-		//strcat(key, "key");
-		sprintf(tmp,"%d",val);
-		strcat(key,tmp);
-		strcat(key,"\0");
-#ifdef _DEBUG
-		fprintf(stdout,"KEY: %s \n",key);
-#endif
-		return;
+	bzero(key, INPUT_BUF_LEN);
+	switch (op) {
+		case 'i':
+			strcpy(key, "i");
 	}
+	sprintf(key+1,"%d",val);
+	strcat(key,"\0");
+	return;
+}
 
 
 void operation(char *buf) {
-		//while (fgets(buf, sizeof (buf), stdin)) {
-		if (buf[0] == 0 || buf[0] == '\n')
-			return;
 
-		switch (buf[0]) {
-			case 'i':
-				str_insert(buf + 1);
-				break;
-			case 'r':
-				str_remove(buf + 1);
-				break;
-			case 'c':
-				str_check(buf + 1);
-				break;
-			case 'n':
-				str_insert_random(buf + 1);
-				break;
-			case 'p':
-				hs_print(pop);
-				break;
-			case 'd':
-				hs_debug(pop);
-				break;
+	if (buf[0] == 0 || buf[0] == '\n')
+		return;
+
+	switch (buf[0]) {
+	case 'i':
+		str_insert(buf + 1);
+		break;
+	case 'r':
+		str_remove(buf + 1);
+		break;
+	case 'c':
+		str_check(buf + 1);
+		break;
+	case 'n':
+		str_insert_random(buf + 1);
+		break;
+	case 'p':
+		hs_print(pop);
+		break;
+	case 'd':
+		hs_debug(pop);
+		break;
 #ifdef DEBUG
-			case 'b':
-				str_rebuild(buf + 1);
-				break;
+	case 'b':
+		str_rebuild(buf + 1);
+		break;
 #endif
-			case 'q':
-				fclose(stdin);
-				break;
-			case 'h':
-				help();
-				break;
-			default:
-				unknown_command(buf);
-				break;
-		}
+	case 'q':
+		fclose(stdin);
+		break;
+	case 'h':
+		help();
+		break;
+	default:
+		unknown_command(buf);
+		break;
+	}
 }
 
 int
@@ -251,18 +246,15 @@ main(int argc, char *argv[])
 	}
 
 	char buf[INPUT_BUF_LEN];
-	printf("Type 'h' for help\n$ ");
 	/*****************************************************************************/
 	/* Insertion */
 	int i=0;
 	for (i = 0; i < ITEM_COUNT; i++)
 	{
-		gen_insert_val(buf,i);
-		//printf("%s \n",buf);
+		gen_insert_val(buf,i,'i');
 		operation(buf);
-		//printf("$ ");
+		printf("%s \n",buf);
 	}
-	//}
 	/*****************************************************************************/
 	pmemobj_close(pop);
 

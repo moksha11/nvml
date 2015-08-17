@@ -521,6 +521,7 @@ tree_map_foreach_node(const TOID(struct tree_map_node) p,
 			return 1;
 
 		if (i != D_RO(p)->n && D_RO(p)->items[i].key != 0) {
+			//printf("%u\n",(unsigned int)D_RO(p)->items[i].key);
 			if (cb(D_RO(p)->items[i].key, D_RO(p)->items[i].value,
 					arg) != 0)
 				return 1;
@@ -547,3 +548,6 @@ tree_map_is_empty(TOID(struct tree_map) map)
 {
 	return TOID_IS_NULL(D_RO(map)->root) || D_RO(D_RO(map)->root)->n == 0;
 }
+
+
+
