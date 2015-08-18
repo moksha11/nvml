@@ -45,7 +45,7 @@ vpath %.c $(COMMON)
 
 INCS += -I../include -I../common/
 
-CFLAGS += -std=gnu99 -Wall -Werror -pthread $(EXTRA_CFLAGS) -D_DISABLE_LOGGING
+CFLAGS += -std=gnu99 -Wall -Werror -pthread $(EXTRA_CFLAGS) #-D_DISABLE_LOGGING #-D_DISABLE_METALOG
 CFLAGS += -DSRCVERSION=\"$(SRCVERSION)\"
 
 LDFLAGS += -Wl,-z,relro $(EXTRA_LDFLAGS)

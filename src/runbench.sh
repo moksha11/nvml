@@ -19,6 +19,8 @@ FlushDisk()
 	sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"
 }
 
+APPBASE=$BASE/tree_map
+APP=$APPBASE/data_store_btree
 
 PARAM=$1
 #PARAM="8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32786 65572"

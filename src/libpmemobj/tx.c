@@ -168,8 +168,6 @@ constructor_tx_zalloc(PMEMobjpool *pop, void *ptr, void *arg)
 static void
 constructor_tx_add_range(PMEMobjpool *pop, void *ptr, void *arg)
 {
-#ifdef _DISABLE_LOGGING
-#else
 	LOG(3, NULL);
 
 	ASSERTne(ptr, NULL);
@@ -199,7 +197,6 @@ constructor_tx_add_range(PMEMobjpool *pop, void *ptr, void *arg)
 
 	/* do not report changes to the original object */
 	VALGRIND_ADD_TO_TX(src, args->size);
-#endif
 }
 
 /*
@@ -586,7 +583,7 @@ tx_post_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
 
-#ifdef _DISABLE_LOGGING
+#ifdef _DISABLE_METALOG
 #else
 	PMEMoid obj;
 	int ret;
@@ -797,6 +794,8 @@ static PMEMoid
 tx_alloc_common(size_t size, unsigned int type_num,
 	void (*constructor)(PMEMobjpool *pop, void *ptr, void *arg))
 {
+#ifdef _DISABLE_METALOG
+#else
 	LOG(3, NULL);
 
 	if (tx.stage != TX_STAGE_WORK) {
@@ -834,7 +833,7 @@ tx_alloc_common(size_t size, unsigned int type_num,
 		errno = ENOMEM;
 		pmemobj_tx_abort(ENOMEM);
 	}
-
+#endif
 	return retoid;
 }
 
@@ -1251,7 +1250,7 @@ int
 pmemobj_tx_add_range_direct(void *ptr, size_t size)
 {
 
-#if _DISABLE_LOGGING
+#ifdef _DISABLE_LOGGING
 	//printf("disabling logging\n");
 	return 0;
 #endif
@@ -1282,7 +1281,7 @@ int
 pmemobj_tx_add_range(PMEMoid oid, uint64_t hoff, size_t size)
 {
 #ifdef _DISABLE_LOGGING
-	printf("disabling logging\n");
+	//printf("disabling logging\n");
 	return 0;
 #endif
 
