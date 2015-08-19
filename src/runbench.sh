@@ -34,12 +34,9 @@ for ELEMENTSIZE  in `echo $PARAM`
 do
 sudo rm  $INPUTFILE
 FlushDisk
-#SEDCMD="'/membudget_mb/c\membudget_mb = $MEMBUDGET' /home/sudarsun/devel/Docs/graphchi/graphchi-cpp/conf/graphchi.cnf"
-#eval sed -i $SEDCMD
-#echo "edgelist" | /usr/bin/time -v taskset --cpu-list $CPULIST /home/sudarsun/devel/Docs/graphchi/graphchi-cpp/bin/example_apps/pagerank file $INPUTFILE niters 8 &> "result_mem"$MEMBUDGET"_cpu"$CPUS".out"
 cd $APPBASE
 #~/devel/nvmalloc/scripts/likwid_instrcnt.sh "taskset --cpu-list 1,2,3,4 $APP -i -e $ELEMENTSIZE $THREADCOUNT $OPS $INPUTFILE" &>> $RESULTS/$resultout
-taskset --cpu-list 1,2,3,4 $APP $INPUTFILE
+LD_PRELOAD=/usr/lib/librdpmc.so taskset --cpu-list 1,2,3,4 $APP $INPUTFILE
 done
 
 

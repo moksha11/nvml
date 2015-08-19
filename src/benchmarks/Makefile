@@ -33,7 +33,7 @@
 #
 # Makefile -- build all benchmarks
 #
-BENCHMARK = vmem_mt blk_mt log_mt btree
+BENCHMARK = vmem_mt blk_mt log_mt btree tree_map
 
 all     : TARGET = all
 clean   : TARGET = clean
