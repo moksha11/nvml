@@ -42,6 +42,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <rdpmc.h>
 
 #include "libpmem.h"
 #include "libpmemobj.h"
@@ -97,6 +98,129 @@ struct tx_add_range_args {
 	uint64_t offset;
 	uint64_t size;
 };
+
+
+
+#ifdef _DISABLE_LOGGING
+#define MONITORINGFREQ 100000
+#define RELAX_LOGGING 1
+
+long long instr_budget =4000000000;
+long long llcstoremiss_budget =900000000;
+long long llcloadmiss_budget =0;
+
+long long prev_instr, prev_llcstoremiss;
+int relaxdatalog=0;
+int prev_log_mode=0;
+int nr_relaxed_logs=0;
+int nr_completed_logs=0;
+int nr_txcount=0;
+int nr_txcount_start=0;
+
+int tx_set_log_mode() { 
+
+	long long curr_instr, curr_llcstoremiss, curr_llcloadmiss;
+	get_counter_diff(&curr_instr,&curr_llcstoremiss,&curr_llcloadmiss);
+	if((instr_budget < curr_instr) && (llcstoremiss_budget < curr_llcstoremiss)){
+			relaxdatalog = RELAX_LOGGING;	
+			printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+	}else {
+		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+		relaxdatalog = 0;
+	}
+	//relaxdatalog = RELAX_LOGGING;
+#if 0
+	get_perf_counter(&curr_instr,&curr_llcstoremiss);
+	
+	if(prev_instr == 0 || prev_llcstoremiss == 0) {
+		prev_instr = curr_instr;
+		prev_llcstoremiss = curr_llcstoremiss;
+		goto dontrelax;
+	}
+
+	if(prev_llcstoremiss < curr_llcstoremiss) {
+
+		/*double llc_incr_percent=0;
+		llc_incr_percent = ((double)(curr_llcstoremiss -prev_llcstoremiss)/
+											(double)prev_llcstoremiss)*100;
+		fprintf(stderr,"curr_llcstoremiss %lu "
+					   "prev_llcstoremiss %lu "
+					   "diff %lu "
+					   "Increase per %lf\n",
+						curr_llcstoremiss, 
+						prev_llcstoremiss,
+						curr_llcstoremiss - prev_llcstoremiss,
+						llc_incr_percent);*/
+	    prev_log_mode = 0;
+		goto dontrelax;
+	}
+
+	if(prev_llcstoremiss == curr_llcstoremiss) {
+		if(prev_log_mode != RELAX_LOGGING)
+			goto dontrelax;
+	}
+
+	relaxdatalog = RELAX_LOGGING;
+	prev_log_mode = RELAX_LOGGING;
+	goto returnset;
+dontrelax:
+	relaxdatalog = 0;
+returnset:
+	prev_llcstoremiss = curr_llcstoremiss;
+	prev_instr = curr_instr;
+	return 0;
+#endif
+	return 0;
+}
+
+
+
+int tx_is_relaxedlog() {
+
+	if(relaxdatalog) {
+		nr_relaxed_logs++;
+	}else {
+		nr_completed_logs++;
+	}
+
+	//if(relaxdatalog)
+	//fprintf(stderr,"relaxdatalog %d \n",relaxdatalog);
+
+	return relaxdatalog;
+	//return RELAX_LOGGING;
+	//return 0;
+}
+
+void reset_log_mode() {
+	relaxdatalog = 0;
+}
+
+void tx_start_monitoring(){
+	if(!nr_txcount) {
+		start_perf_monitoring();
+		nr_txcount = 1;
+	}
+}
+
+void tx_stop_monitoring(){
+
+	nr_txcount_start++;
+
+	if(nr_txcount_start % MONITORINGFREQ == 0) {
+		stop_perf_monitoring();
+		tx_set_log_mode();
+		nr_txcount = 0;
+	}
+	//nr_txcount++;
+}
+
+void print_stats(){
+	fprintf(stdout,"nr_relaxed_logs %u "
+			"nr_completed_logs %u \n",
+			nr_relaxed_logs, nr_completed_logs);
+}
+#endif
+
 
 /*
  * constructor_tx_alloc -- (internal) constructor for normal alloc
@@ -286,8 +410,12 @@ static int
 tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 {
 	LOG(3, NULL);
+
 #ifdef _DISABLE_LOGGING
-#else
+	if(tx_is_relaxedlog()){ 	
+		return 0;
+	}
+#endif
 	int ret;
 	PMEMoid obj;
 	while (!OBJ_LIST_EMPTY(head)) {
@@ -311,8 +439,6 @@ tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 			return ret;
 		}
 	}
-#endif
-
 	return 0;
 }
 
@@ -519,7 +645,10 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 	LOG(3, NULL);
 
 #ifdef _DISABLE_LOGGING
-#else
+	if(tx_is_relaxedlog()){ 	
+		return;
+	}
+#endif
 	PMEMoid iter;
 	for (iter = layout->undo_alloc.pe_first; !OBJ_OID_IS_NULL(iter);
 		iter = oob_list_next(pop,
@@ -547,7 +676,6 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 		/* flush and persist the whole allocated area and oob header */
 		pop->persist(oobh, size);
 	}
-#endif
 }
 
 /*
@@ -558,9 +686,11 @@ static void
 tx_pre_commit_set(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
-
 #ifdef _DISABLE_LOGGING
-#else
+	if(tx_is_relaxedlog()){ 	
+		return;
+	}
+#endif
 	PMEMoid iter;
 	for (iter = layout->undo_set.pe_first; !OBJ_OID_IS_NULL(iter);
 		iter = oob_list_next(pop, &layout->undo_set, iter)) {
@@ -571,7 +701,6 @@ tx_pre_commit_set(PMEMobjpool *pop, struct lane_tx_layout *layout)
 		/* flush and persist modified area */
 		pop->persist(ptr, range->size);
 	}
-#endif
 }
 
 /*
@@ -958,6 +1087,13 @@ pmemobj_tx_begin(PMEMobjpool *pop, jmp_buf env, ...)
 
 	int err = 0;
 
+#ifdef _DISABLE_LOGGING
+	//print_stats();
+	//reset_log_mode();
+	//tx_set_log_mode();
+	tx_start_monitoring();
+#endif
+
 	struct lane_tx_runtime *lane = NULL;
 	if (tx.stage == TX_STAGE_WORK) {
 		lane = tx.section->runtime;
@@ -1106,6 +1242,13 @@ pmemobj_tx_commit()
 void
 pmemobj_tx_end()
 {
+#ifdef _DISABLE_LOGGING
+	//print_stats();
+	//reset_log_mode();
+	//tx_set_log_mode();
+	tx_stop_monitoring();
+#endif
+
 	LOG(3, NULL);
 	ASSERT(tx.stage != TX_STAGE_WORK);
 
@@ -1249,12 +1392,11 @@ pmemobj_tx_add_common(struct tx_add_range_args *args)
 int
 pmemobj_tx_add_range_direct(void *ptr, size_t size)
 {
-
 #ifdef _DISABLE_LOGGING
-	//printf("disabling logging\n");
-	return 0;
+	if(tx_is_relaxedlog()){ 	
+		return 0;
+	}
 #endif
-
 	LOG(3, NULL);
 
 	if (tx.stage != TX_STAGE_WORK) {
@@ -1281,8 +1423,9 @@ int
 pmemobj_tx_add_range(PMEMoid oid, uint64_t hoff, size_t size)
 {
 #ifdef _DISABLE_LOGGING
-	//printf("disabling logging\n");
-	return 0;
+	if(tx_is_relaxedlog()){ 	
+		return 0;
+	}
 #endif
 
 	LOG(3, NULL);
@@ -1330,6 +1473,8 @@ pmemobj_tx_alloc(size_t size, unsigned int type_num)
 {
 	LOG(3, NULL);
 
+	//printf("Calling pmemobj_tx_alloc\n");
+
 	if (size == 0) {
 		ERR("allocation with size 0");
 		errno = EINVAL;
@@ -1347,6 +1492,8 @@ pmemobj_tx_zalloc(size_t size, unsigned int type_num)
 {
 	LOG(3, NULL);
 
+	//printf("Calling pmemobj_tx_zalloc\n");
+
 	if (size == 0) {
 		ERR("allocation with size 0");
 		errno = EINVAL;
@@ -1362,6 +1509,8 @@ pmemobj_tx_zalloc(size_t size, unsigned int type_num)
 PMEMoid
 pmemobj_tx_realloc(PMEMoid oid, size_t size, unsigned int type_num)
 {
+	//printf("Calling pmemobj_tx_realloc\n");
+
 	LOG(3, NULL);
 
 	return tx_realloc_common(oid, size, type_num,
@@ -1420,6 +1569,8 @@ int
 pmemobj_tx_free(PMEMoid oid)
 {
 	LOG(3, NULL);
+
+	//printf("Calling pmemobj_tx_free\n");
 
 	if (tx.stage != TX_STAGE_WORK) {
 		ERR("invalid tx stage");

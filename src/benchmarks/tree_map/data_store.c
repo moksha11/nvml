@@ -42,8 +42,10 @@
 #include <time.h>
 #include <assert.h>
 #include "tree_map.h"
+#include <rdpmc.h>
 
 #define TEST_RESTART
+#define MONITORINGFREQ 100000
 
 POBJ_LAYOUT_BEGIN(data_store);
 POBJ_LAYOUT_ROOT(data_store, struct store_root);
@@ -115,12 +117,13 @@ dec_keys(uint64_t key, PMEMoid value, void *arg)
 }
 
 int main(int argc, const char *argv[]) {
-	if (argc < 2) {
+
+	/*if (argc < 2) {
 		printf("usage: %s file-name\n", argv[0]);
 		return 1;
-	}
+	}*/
 
-	const char *path = argv[1];
+	const char *path = "/tmp/ramdisk/test"; //argv[1];
 
 	PMEMobjpool *pop;
 	srand(time(NULL));
@@ -144,7 +147,7 @@ int main(int argc, const char *argv[]) {
 		if (!TOID_IS_NULL(D_RO(root)->map)){
 			tree_map_foreach(D_RO(root)->map, get_keys, NULL);
 		}
-		exit(0);
+		//exit(0);
 #endif
 	}
 
@@ -154,13 +157,26 @@ int main(int argc, const char *argv[]) {
 
 	tree_map_new(pop, &D_RW(root)->map);
 
+	int nr_tx = 0;
+
 	for (int i = 0; i < MAX_INSERTS; ++i) {
+
+		if(nr_tx == 0)
+			start_perf_monitoring();
+
 		/* insert random items in a transaction */
 		TX_BEGIN(pop) {
 			/* new_store_item is transactional! */
 			tree_map_insert(pop, D_RO(root)->map, rand(),
 					new_store_item().oid);
 		}TX_END
+
+		if(nr_tx == MONITORINGFREQ){
+			stop_perf_monitoring();
+			nr_tx = 0;
+		}else{
+			nr_tx++;
+		}
 	}
 
 

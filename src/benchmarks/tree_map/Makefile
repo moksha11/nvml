@@ -39,8 +39,8 @@ INCDIR ?= ../../../include
 LIBDIR ?= ../../../debug
 
 INCS = -I$(INCDIR)
-LIBS = -Wl,-rpath=$(LIBDIR) -L$(LIBDIR) -lpmemobj -pthread
-CFLAGS = -std=gnu99 -Wall -Werror -ggdb 
+LIBS = -Wl,-rpath=$(LIBDIR) -L$(LIBDIR) -lpmemobj -pthread -lrdpmc
+CFLAGS = -std=gnu99 -Wall -Werror -pg #-ggdb 
 CSTYLE = ../../../../utils/cstyle
 
 all:     TARGET = all
@@ -63,7 +63,7 @@ cstyle: $(DIRS)
 	$(CC) -c -o $@ $(CFLAGS) $(INCS) $<
 
 $(PROGS):
-	$(CC) -o $@ $< tree_map.o data_store.o $(LIBS)
+	$(CC) -o $@ $< tree_map.o data_store.o $(LIBS) -pg
 
 data_store_ctree: ctree_map.o tree_map.o data_store.o
 data_store_btree: btree_map.o tree_map.o data_store.o

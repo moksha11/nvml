@@ -1,8 +1,8 @@
 #!/bin/bash
-set -x
+#set -x
 
 INPUTFILE=/tmp/ramdisk/test
-BASE=/home/stewart/Dropbox/nvml/src/benchmarks
+BASE=/home/stewart/Dropbox/nvml/src/examples/libpmemobj
 APPBASE=$BASE/btree
 APP=$APPBASE/btree
 OPS=10000
@@ -36,7 +36,11 @@ sudo rm  $INPUTFILE
 FlushDisk
 cd $APPBASE
 #~/devel/nvmalloc/scripts/likwid_instrcnt.sh "taskset --cpu-list 1,2,3,4 $APP -i -e $ELEMENTSIZE $THREADCOUNT $OPS $INPUTFILE" &>> $RESULTS/$resultout
-LD_PRELOAD=/usr/lib/librdpmc.so taskset --cpu-list 1,2,3,4 $APP $INPUTFILE
+#LD_PRELOAD=/usr/lib/librdpmc.so 
+#/home/stewart/Dropbox/nvml/src/killer.sh &
+time taskset --cpu-list 1,2,3,4 $APP $INPUTFILE
+#gprof "$APP $INPUTFILE"
+#gprof $APP
 done
 
 

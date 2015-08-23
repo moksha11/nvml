@@ -533,6 +533,9 @@ pmemobj_close(PMEMobjpool *pop)
 	}
 
 	pmemobj_cleanup(pop);
+#ifdef _DISABLE_LOGGING
+	print_stats();
+#endif
 }
 
 /*

@@ -40,6 +40,7 @@
 #include <stdint.h>
 #include <pthread.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include "libpmem.h"
 #include "libpmemobj.h"
@@ -387,6 +388,7 @@ heap_buckets_init(PMEMobjpool *pop)
 	struct pmalloc_heap *h = pop->heap;
 	int i;
 
+	//printf("calling heap_buckets_init \n");
 	bucket_proto[0].unit_max = RUN_UNIT_MAX;
 
 	/*
@@ -482,6 +484,14 @@ static void
 heap_recycle_block(PMEMobjpool *pop, struct bucket *b, struct memory_block *m,
 	uint32_t units)
 {
+
+#ifdef _EAP_ALLOC_OPTIMIZE
+//	m->size_idx = units;
+//	return;
+#endif
+
+	//printf("bucket_insert_block heap_recycle_block");
+
 	if (bucket_is_small(b)) {
 		struct memory_block r = {m->chunk_id, m->zone_id,
 			m->size_idx - units, m->block_off + units};
@@ -519,7 +529,11 @@ heap_get_bestfit_block(PMEMobjpool *pop, struct bucket *b,
 	}
 
 	if (units != m->size_idx)
+#ifndef _EAP_ALLOC_OPTIMIZE
 		heap_recycle_block(pop, b, m, units);
+#else
+		heap_recycle_block(pop, b, m, units);
+#endif
 
 	bucket_unlock(b);
 

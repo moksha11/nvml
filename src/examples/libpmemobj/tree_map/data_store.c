@@ -43,7 +43,7 @@
 #include <assert.h>
 #include "tree_map.h"
 
-#define TEST_RESTART
+//#define TEST_RESTART
 
 POBJ_LAYOUT_BEGIN(data_store);
 POBJ_LAYOUT_ROOT(data_store, struct store_root);
@@ -84,11 +84,11 @@ void gen_random(char *s, const int len) {
 TOID(struct store_item)
 new_store_item()
 {
-	char buf[ELEMENTSZ];
-	gen_random(buf, ELEMENTSZ);
+	//char buf[ELEMENTSZ];
+	//gen_random(buf, ELEMENTSZ);
 	TOID(struct store_item) item = TX_NEW(struct store_item);
 	//D_RW(item)->item_data = rand();
-	 memcpy(D_RW(item)->item_data, buf, ELEMENTSZ);
+	// memcpy(D_RW(item)->item_data, buf, ELEMENTSZ);
 
 	return item;
 }
@@ -131,7 +131,7 @@ int main(int argc, const char *argv[]) {
 			fprintf(stderr,"failed to create pool %s\n", path);
 			return 1;
 		}
-		//return 0;
+	//	return 0;
 	} else {
 		if ((pop = pmemobj_open(path,
 				POBJ_LAYOUT_NAME(data_store))) == NULL) {
@@ -154,19 +154,22 @@ int main(int argc, const char *argv[]) {
 	if (!TOID_IS_NULL(D_RO(root)->map)) /* delete the map if it exists */
 		tree_map_delete(pop, &D_RW(root)->map);
 
+		int i =0;
 	/* insert random items in a transaction */
-	TX_BEGIN(pop) {
 		tree_map_new(pop, &D_RW(root)->map);
 
-		for (int i = 0; i < MAX_INSERTS; ++i) {
+		for (i = 0; i < MAX_INSERTS; ++i) {
+			TX_BEGIN(pop) {
+			//fprintf(stdout,"calling transactions \n");
 			/* new_store_item is transactional! */
 			tree_map_insert(pop, D_RO(root)->map, rand(),
 				new_store_item().oid);
+			}TX_END
 		}
-
-	} TX_END
+		fprintf(stdout,"calling transactions finish %u\n", i);
 
 	/* count the items */
+	//if(D_RO(root)->map)
 	tree_map_foreach(D_RO(root)->map, get_keys, NULL);
 
 #ifndef TEST_RESTART

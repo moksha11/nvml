@@ -19,3 +19,8 @@ int pmc_init(int *eventId, int count);
 int start_perf_monitoring();
 int stop_perf_monitoring();
 void constructor();
+int get_perf_counter(unsigned long *, unsigned long *);
+int monitoring_enabled();
+void get_counter_diff(long long *instrcntr,
+                    long long *nvmstores,
+                    long long *nvmloads);

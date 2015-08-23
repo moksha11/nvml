@@ -354,6 +354,10 @@ pmalloc_usable_size(PMEMobjpool *pop, uint64_t off)
 int
 pfree(PMEMobjpool *pop, uint64_t *off)
 {
+
+#ifdef _EAP_ALLOC_OPTIMIZE
+	return 0;
+#endif
 	struct allocation_header *alloc = alloc_get_header(pop, *off);
 
 	struct bucket *b = heap_get_best_bucket(pop, alloc->size);

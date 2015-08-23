@@ -17,6 +17,13 @@
 
 #include <sched.h>
 
+#define NOEMULATE_LATENCY
+
+#ifdef NOEMULATE_LATENCY
+int enable_monitoring;
+int initalized;
+#endif
+
 #define PMC_USER_MASK    0x00010000
 #define PMC_OS_MASK      0x00020000
 #define PMC_ENABLE_MASK  0x00400000
@@ -28,7 +35,7 @@
 #define CTRL_SET_UM(val, m) (val |= (m << 8))
 #define CTRL_SET_EVENT(val, e) (val |= e)
 
-static pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
+//static pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
 
 typedef unsigned long long hrtime_t;
 
@@ -36,6 +43,17 @@ long long start0, start1, start2, start3, stop0, stop1, stop2, stop3;
 
 static void con() __attribute__((constructor));
 static inline unsigned long long hrtime_cycles(void);
+
+
+int get_perf_counter(unsigned long *instr, unsigned long *llcmiss){
+	*instr = stop0;
+	*llcmiss = stop1;
+	return 0;	
+}
+
+int star_read_perf_counter(unsigned long *instr, unsigned long *llcmiss){
+
+}
 
 static inline
 void
@@ -66,6 +84,7 @@ static inline unsigned long long hrtime_cycles(void)
 	return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
 }   
 
+#ifndef NOEMULATE_LATENCY
 void delay_handler (int signum)
 {
 	static int count = 0;
@@ -88,7 +107,6 @@ void delay_handler (int signum)
 
 	long long delay = LLC_Store_Miss * (500-60);
 	//printf("Stall_l2_pending: %llu\nLLC_Miss: %llu\nLLC_Hit: %llu\nInstructions: %llu ldm_stall: %llu\n", stop0-start0, stop1-start1, stop2-start2, stop3-start3, ldm_stall); 
-
 	printf("Instructions: %llu\t "
 			 "LLC Store Misses: %llu\t"
 			 "LLC Load Misses: %llu \n",
@@ -108,27 +126,113 @@ void delay_handler (int signum)
 	//start3 = rdpmc(0x3);
 	pthread_mutex_unlock(&myMutex);
 }
+#else
+void delay_handler (int signum)
+{
+	enable_monitoring=1;
+	//fprintf(stderr,"enable_monitoring %u\n",enable_monitoring);
+}
+#endif
+
+int monitoring_enabled(){
+	if(!initalized){
+		init_monitoring();
+		initalized = 1;
+	}
+	return enable_monitoring;
+}
+
+int init_monitoring(){
+
+#ifndef NOEMULATE_LATENCY
+	struct itimerval timer;
+#endif
+	/* Initializing the rdpmc library */
+	int eventId[4] = {0, 0, 0, 0};
+
+	//Event INSTRUCTION_RETIRED
+	//CTRL_SET_EVENT(eventId[3], 0xb1);
+	//CTRL_SET_UM(eventId[3], 0x01);
+	//CTRL_SET_INT(eventId[3]);
+	//CTRL_SET_ENABLE(eventId[3]);
+	//CTRL_SET_INV(eventId[3]);
+	//CTRL_SET_CM(eventId[3], 0x01);
+	eventId[0] = 0x5300c0;
+
+	// Event MEM_LOAD_RETIRED:LLC_MISS
+	//CTRL_SET_EVENT(eventId[1], 0xd4);
+	//CTRL_SET_UM(eventId[1], 0x02);
+	//CTRL_SET_INT(eventId[1]);
+	//CTRL_SET_ENABLE(eventId[1]);
+	//eventId[1] = 0x5302cb;
+
+	/*Event LLC_STORE MISS*/
+	//Event MEM_LOAD_RETIRED:L2_LINE_IN:BOTH_CORES
+	//CTRL_SET_EVENT(eventId[1], 0xd4);
+	//CTRL_SET_UM(eventId[1], 0x02);
+	//CTRL_SET_INT(eventId[1]);
+	//CTRL_SET_ENABLE(eventId[1]);
+	eventId[1] = 0x10102;
+
+	/*Event LLC_LOAD MISS*/
+	//Event MEM_LOAD_RETIRED:LLC_MISS
+	//CTRL_SET_EVENT(eventId[2], 0xd1);
+	//CTRL_SET_UM(eventId[2], 0x04);
+	//CTRL_SET_INT(eventId[2]);
+	//CTRL_SET_ENABLE(eventId[2]);
+	//eventId[2] = 0x5302cb;
+	eventId[2] = 0x53200f;
+
+	// Event CYCLE_ACTIVITY:STALLS_L2_PENDING
+	//CTRL_SET_EVENT(eventId[0], 0xa3);
+	//CTRL_SET_UM(eventId[0], 0x05);
+	//CTRL_SET_INT(eventId[0]);
+	//CTRL_SET_ENABLE(eventId[0]);
+	//eventId[3] = 0x5301cb;
+	pmc_init(eventId, 3);
+
+#ifndef NOEMULATE_LATENCY
+	/* Configure the timer to expire after 10 msec... */
+	timer.it_value.tv_sec = 0;
+	timer.it_value.tv_usec = 100000;
+	/* ... and every 250 msec after that. */
+	timer.it_interval.tv_sec = 1;
+	timer.it_interval.tv_usec = 0;
+	/* Start a virtual timer. It counts down whenever this process is
+     executing. */
+	setitimer (ITIMER_PROF, &timer, NULL);
+#endif
+	return 0;
+}
+
 
 void con() {
-
 	//printf("I'm a constructor\n");
 	struct sigaction sa;
+#ifndef NOEMULATE_LATENCY
 	cpu_set_t my_set;        /* Define your cpu_set bit mask. */
 	CPU_ZERO(&my_set);       /* Initialize it all to 0, i.e. no CPUs selected. */
 	CPU_SET(0, &my_set);     /* set the bit that represents core 0. */
 	sched_setaffinity(0, sizeof(cpu_set_t), &my_set); /* Set affinity of tihs process to */
+#endif
 	/* the defined mask */
 	/* Install timer_handler as the signal handler for SIGVTALRM. */
 	memset (&sa, 0, sizeof (sa));
 	sa.sa_handler = &delay_handler;
 	sigaction (SIGPROF, &sa, NULL);
+#ifndef NOEMULATE_LATENCY
 	start_perf_monitoring();
+#else
+	init_monitoring();
+#endif
+
 	/* Do busy work. */
 	//while (1);
 }
 
 int start_perf_monitoring(){
 
+#ifndef NOEMULATE_LATENCY
 	struct itimerval timer;
 	/* Initializing the rdpmc library */
 	int eventId[4] = {0, 0, 0, 0};
@@ -163,8 +267,8 @@ int start_perf_monitoring(){
 	//CTRL_SET_UM(eventId[2], 0x04);
 	//CTRL_SET_INT(eventId[2]);
 	//CTRL_SET_ENABLE(eventId[2]);
-	eventId[2] = 0x5302cb;
-	//eventId[2] = 0x10102;
+	//eventId[2] = 0x5302cb;
+	eventId[2] = 0x53200f;
 
 	// Event CYCLE_ACTIVITY:STALLS_L2_PENDING
 	//CTRL_SET_EVENT(eventId[0], 0xa3);
@@ -189,21 +293,65 @@ int start_perf_monitoring(){
 	/* Start a virtual timer. It counts down whenever this process is
      executing. */
 	setitimer (ITIMER_PROF, &timer, NULL);
+#else
+	start0 = rdpmc(0);
+	start1 = rdpmc(1);
+	start2 = rdpmc(2);
+
+    /*printf("start_perf_monitoring Instructions: %llu\t "
+                 "LLC Store Misses: %llu\t"
+                 "LLC Load Misses: %llu \n",
+                 start0,
+                 start1,
+                 start2);*/
+#endif
 	return 0;
+}
+
+
+void get_counter_diff(long long *instrcntr, 
+		      long long *nvmstores, 
+		      long long *nvmloads){
+	*instrcntr = stop0-start0;
+	*nvmstores = stop1-start1;
+	*nvmloads = stop2-start2;
 }
 
 int stop_perf_monitoring(){
 
+#ifndef NOEMULATE_LATENCY
 	struct itimerval timer;
-
 	timer.it_value.tv_sec = 0;
 	timer.it_value.tv_usec = 0;
 	timer.it_interval.tv_sec = 0;
 	timer.it_interval.tv_usec = 0;
 	//Disabling the timer
 	setitimer (ITIMER_PROF, &timer, NULL);
+#else
+
+	stop0 = rdpmc(0);
+	stop1 = rdpmc(1);
+	stop2 = rdpmc(2);
+
+	/*printf("Stop monitoring Instructions: %llu\t "
+				 "LLC Store Misses: %llu\t"
+				 "LLC Load Misses: %llu \n",
+				 stop0-start0,
+				 stop1-start1,
+				 stop2-start2);*/
+
+	enable_monitoring = 0;
+	/*start0 = 0;
+	start1 = 0;
+	start2 = 0;
+	
+	stop0 = 0;
+	stop1 = 0;
+	stop2 = 0;*/
+#endif
 	return 0;
 }
+
 
 static __inline__ long rdtsc_lo(void)
 {

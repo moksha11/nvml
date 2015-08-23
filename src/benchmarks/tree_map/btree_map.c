@@ -39,6 +39,8 @@
 #include <stdio.h>
 #include "tree_map.h"
 
+
+
 TOID_DECLARE(struct tree_map_node, TREE_MAP_TYPE_OFFSET + 1);
 
 #define	BTREE_ORDER 8 /* can't be odd */
@@ -520,7 +522,7 @@ tree_map_foreach_node(const TOID(struct tree_map_node) p,
 		if (tree_map_foreach_node(D_RO(p)->slots[i], cb, arg) != 0)
 			return 1;
 
-		printf("%u\n",(unsigned int)D_RO(p)->items[i].key);
+		//printf("%u\n",(unsigned int)D_RO(p)->items[i].key);
 
 		if (i != D_RO(p)->n && D_RO(p)->items[i].key != 0) {
 			//printf("%u\n",(unsigned int)D_RO(p)->items[i].key);
