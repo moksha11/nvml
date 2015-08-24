@@ -1,0 +1,837 @@
+cc -c -o btree_map.o -std=gnu99 -Wall -Werror -g  -I../../../include btree_map.c
+In file included from tree_map.h:40:0,
+                 from btree_map.c:41:
+btree_map.c: In function ‘tree_map_merge’:
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:300:34: note: in expansion of macro ‘D_RO’
+  struct tree_map_node_item sep = D_RO(parent)->items[p];
+                                  ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:300:34: note: in expansion of macro ‘D_RO’
+  struct tree_map_node_item sep = D_RO(parent)->items[p];
+                                  ^
+../../../include/libpmemobj.h:929:25: error: request for member ‘oid’ in something not a structure or union
+ pmemobj_tx_add_range((o).oid, 0, sizeof (*(o)._type))
+                         ^
+btree_map.c:302:2: note: in expansion of macro ‘TX_ADD’
+  TX_ADD(node);
+  ^
+../../../include/libpmemobj.h:929:46: error: request for member ‘_type’ in something not a structure or union
+ pmemobj_tx_add_range((o).oid, 0, sizeof (*(o)._type))
+                                              ^
+btree_map.c:302:2: note: in expansion of macro ‘TX_ADD’
+  TX_ADD(node);
+  ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+  ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+  ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+  ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+  ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+  ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:20: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+                    ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:20: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+                    ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:20: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+                    ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:20: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+                    ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:304:20: note: in expansion of macro ‘D_RW’
+  D_RW(node)->items[D_RW(node)->n++] = sep;
+                    ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:307:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->items[D_RO(node)->n], D_RO(rn)->items,
+          ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:307:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->items[D_RO(node)->n], D_RO(rn)->items,
+          ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:307:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->items[D_RO(node)->n], D_RO(rn)->items,
+          ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:307:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->items[D_RO(node)->n], D_RO(rn)->items,
+          ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:307:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->items[D_RO(node)->n], D_RO(rn)->items,
+          ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:307:28: note: in expansion of macro ‘D_RO’
+  memcpy(&D_RW(node)->items[D_RO(node)->n], D_RO(rn)->items,
+                            ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:307:28: note: in expansion of macro ‘D_RO’
+  memcpy(&D_RW(node)->items[D_RO(node)->n], D_RO(rn)->items,
+                            ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:307:44: note: in expansion of macro ‘D_RO’
+  memcpy(&D_RW(node)->items[D_RO(node)->n], D_RO(rn)->items,
+                                            ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:307:44: note: in expansion of macro ‘D_RO’
+  memcpy(&D_RW(node)->items[D_RO(node)->n], D_RO(rn)->items,
+                                            ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:308:39: note: in expansion of macro ‘D_RO’
+  sizeof (struct tree_map_node_item) * D_RO(rn)->n);
+                                       ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:308:39: note: in expansion of macro ‘D_RO’
+  sizeof (struct tree_map_node_item) * D_RO(rn)->n);
+                                       ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:309:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->slots[D_RO(node)->n], D_RO(rn)->slots,
+          ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:309:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->slots[D_RO(node)->n], D_RO(rn)->slots,
+          ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:309:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->slots[D_RO(node)->n], D_RO(rn)->slots,
+          ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:309:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->slots[D_RO(node)->n], D_RO(rn)->slots,
+          ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:309:10: note: in expansion of macro ‘D_RW’
+  memcpy(&D_RW(node)->slots[D_RO(node)->n], D_RO(rn)->slots,
+          ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:309:28: note: in expansion of macro ‘D_RO’
+  memcpy(&D_RW(node)->slots[D_RO(node)->n], D_RO(rn)->slots,
+                            ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:309:28: note: in expansion of macro ‘D_RO’
+  memcpy(&D_RW(node)->slots[D_RO(node)->n], D_RO(rn)->slots,
+                            ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:309:44: note: in expansion of macro ‘D_RO’
+  memcpy(&D_RW(node)->slots[D_RO(node)->n], D_RO(rn)->slots,
+                                            ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:309:44: note: in expansion of macro ‘D_RO’
+  memcpy(&D_RW(node)->slots[D_RO(node)->n], D_RO(rn)->slots,
+                                            ^
+../../../include/libpmemobj.h:208:1: error: invalid application of ‘sizeof’ to incomplete type ‘union tree_map_node_toid’
+ union _toid_##t##_toid
+ ^
+btree_map.c:310:10: note: in expansion of macro ‘TOID’
+  sizeof (TOID(struct tree_map_node)) * (D_RO(rn)->n + 1));
+          ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:310:41: note: in expansion of macro ‘D_RO’
+  sizeof (TOID(struct tree_map_node)) * (D_RO(rn)->n + 1));
+                                         ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:310:41: note: in expansion of macro ‘D_RO’
+  sizeof (TOID(struct tree_map_node)) * (D_RO(rn)->n + 1));
+                                         ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:312:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->n += D_RO(rn)->n;
+  ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:312:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->n += D_RO(rn)->n;
+  ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:312:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->n += D_RO(rn)->n;
+  ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:312:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->n += D_RO(rn)->n;
+  ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:312:2: note: in expansion of macro ‘D_RW’
+  D_RW(node)->n += D_RO(rn)->n;
+  ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:312:19: note: in expansion of macro ‘D_RO’
+  D_RW(node)->n += D_RO(rn)->n;
+                   ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:312:19: note: in expansion of macro ‘D_RO’
+  D_RW(node)->n += D_RO(rn)->n;
+                   ^
+../../../include/libpmemobj.h:963:20: error: request for member ‘oid’ in something not a structure or union
+ pmemobj_tx_free((o).oid)
+                    ^
+btree_map.c:314:2: note: in expansion of macro ‘TX_FREE’
+  TX_FREE(rn); /* right node is now empty */
+  ^
+../../../include/libpmemobj.h:929:25: error: request for member ‘oid’ in something not a structure or union
+ pmemobj_tx_add_range((o).oid, 0, sizeof (*(o)._type))
+                         ^
+btree_map.c:316:2: note: in expansion of macro ‘TX_ADD’
+  TX_ADD(parent);
+  ^
+../../../include/libpmemobj.h:929:46: error: request for member ‘_type’ in something not a structure or union
+ pmemobj_tx_add_range((o).oid, 0, sizeof (*(o)._type))
+                                              ^
+btree_map.c:316:2: note: in expansion of macro ‘TX_ADD’
+  TX_ADD(parent);
+  ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:317:2: note: in expansion of macro ‘D_RW’
+  D_RW(parent)->n -= 1;
+  ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:317:2: note: in expansion of macro ‘D_RW’
+  D_RW(parent)->n -= 1;
+  ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:317:2: note: in expansion of macro ‘D_RW’
+  D_RW(parent)->n -= 1;
+  ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:317:2: note: in expansion of macro ‘D_RW’
+  D_RW(parent)->n -= 1;
+  ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:317:2: note: in expansion of macro ‘D_RW’
+  D_RW(parent)->n -= 1;
+  ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+          ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+          ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+          ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+          ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+          ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:35: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+                                   ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:35: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+                                   ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:35: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+                                   ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:35: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+                                   ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:320:35: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->items + p, D_RW(parent)->items + p + 1,
+                                   ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:321:40: note: in expansion of macro ‘D_RO’
+  sizeof (struct tree_map_node_item) * (D_RO(parent)->n - p));
+                                        ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:321:40: note: in expansion of macro ‘D_RO’
+  sizeof (struct tree_map_node_item) * (D_RO(parent)->n - p));
+                                        ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+          ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+          ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+          ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+          ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:10: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+          ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:39: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+                                       ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:39: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+                                       ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:39: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+                                       ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:39: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+                                       ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:323:39: note: in expansion of macro ‘D_RW’
+  memmove(D_RW(parent)->slots + p + 1, D_RW(parent)->slots + p + 2,
+                                       ^
+../../../include/libpmemobj.h:208:1: error: invalid application of ‘sizeof’ to incomplete type ‘union tree_map_node_toid’
+ union _toid_##t##_toid
+ ^
+btree_map.c:324:10: note: in expansion of macro ‘TOID’
+  sizeof (TOID(struct tree_map_node)) * (D_RO(parent)->n - p + 1));
+          ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:324:41: note: in expansion of macro ‘D_RO’
+  sizeof (TOID(struct tree_map_node)) * (D_RO(parent)->n - p + 1));
+                                         ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:324:41: note: in expansion of macro ‘D_RO’
+  sizeof (TOID(struct tree_map_node)) * (D_RO(parent)->n - p + 1));
+                                         ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:327:6: note: in expansion of macro ‘D_RO’
+  if (D_RO(parent)->n == 0 && TOID_EQUALS(parent, D_RO(map)->root)) {
+      ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:327:6: note: in expansion of macro ‘D_RO’
+  if (D_RO(parent)->n == 0 && TOID_EQUALS(parent, D_RO(map)->root)) {
+      ^
+../../../include/libpmemobj.h:194:7: error: request for member ‘oid’ in something not a structure or union
+ ((lhs).oid.off == (rhs).oid.off &&\
+       ^
+btree_map.c:327:30: note: in expansion of macro ‘TOID_EQUALS’
+  if (D_RO(parent)->n == 0 && TOID_EQUALS(parent, D_RO(map)->root)) {
+                              ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:194:20: note: in definition of macro ‘TOID_EQUALS’
+ ((lhs).oid.off == (rhs).oid.off &&\
+                    ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:327:50: note: in expansion of macro ‘D_RO’
+  if (D_RO(parent)->n == 0 && TOID_EQUALS(parent, D_RO(map)->root)) {
+                                                  ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:194:20: note: in definition of macro ‘TOID_EQUALS’
+ ((lhs).oid.off == (rhs).oid.off &&\
+                    ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:327:50: note: in expansion of macro ‘D_RO’
+  if (D_RO(parent)->n == 0 && TOID_EQUALS(parent, D_RO(map)->root)) {
+                                                  ^
+../../../include/libpmemobj.h:195:7: error: request for member ‘oid’ in something not a structure or union
+  (lhs).oid.pool_uuid_lo == (rhs).oid.pool_uuid_lo)
+       ^
+btree_map.c:327:30: note: in expansion of macro ‘TOID_EQUALS’
+  if (D_RO(parent)->n == 0 && TOID_EQUALS(parent, D_RO(map)->root)) {
+                              ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:195:29: note: in definition of macro ‘TOID_EQUALS’
+  (lhs).oid.pool_uuid_lo == (rhs).oid.pool_uuid_lo)
+                             ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:327:50: note: in expansion of macro ‘D_RO’
+  if (D_RO(parent)->n == 0 && TOID_EQUALS(parent, D_RO(map)->root)) {
+                                                  ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:195:29: note: in definition of macro ‘TOID_EQUALS’
+  (lhs).oid.pool_uuid_lo == (rhs).oid.pool_uuid_lo)
+                             ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:327:50: note: in expansion of macro ‘D_RO’
+  if (D_RO(parent)->n == 0 && TOID_EQUALS(parent, D_RO(map)->root)) {
+                                                  ^
+../../../include/libpmemobj.h:929:25: error: request for member ‘oid’ in something not a structure or union
+ pmemobj_tx_add_range((o).oid, 0, sizeof (*(o)._type))
+                         ^
+btree_map.c:328:3: note: in expansion of macro ‘TX_ADD’
+   TX_ADD(map);
+   ^
+../../../include/libpmemobj.h:929:46: error: request for member ‘_type’ in something not a structure or union
+ pmemobj_tx_add_range((o).oid, 0, sizeof (*(o)._type))
+                                              ^
+btree_map.c:328:3: note: in expansion of macro ‘TX_ADD’
+   TX_ADD(map);
+   ^
+../../../include/libpmemobj.h:331:41: error: request for member ‘_type’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                         ^
+../../../include/libpmemobj.h:963:18: note: in definition of macro ‘TX_FREE’
+ pmemobj_tx_free((o).oid)
+                  ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:329:11: note: in expansion of macro ‘D_RO’
+   TX_FREE(D_RO(map)->root);
+           ^
+../../../include/libpmemobj.h:331:69: error: request for member ‘oid’ in something not a structure or union
+ #define DIRECT_RO(o) ((const typeof(*(o)._type) *)pmemobj_direct((o).oid))
+                                                                     ^
+../../../include/libpmemobj.h:963:18: note: in definition of macro ‘TX_FREE’
+ pmemobj_tx_free((o).oid)
+                  ^
+../../../include/libpmemobj.h:334:14: note: in expansion of macro ‘DIRECT_RO’
+ #define D_RO DIRECT_RO
+              ^
+btree_map.c:329:11: note: in expansion of macro ‘D_RO’
+   TX_FREE(D_RO(map)->root);
+           ^
+../../../include/libpmemobj.h:329:20: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                    ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:330:3: note: in expansion of macro ‘D_RW’
+   D_RW(map)->root = node;
+   ^
+../../../include/libpmemobj.h:329:29: error: request for member ‘oid’ in something not a structure or union
+ {typeof((o)) _o; _o.oid = _o.oid;\
+                             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:330:3: note: in expansion of macro ‘D_RW’
+   D_RW(map)->root = node;
+   ^
+../../../include/libpmemobj.h:330:13: error: request for member ‘_type’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+             ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:330:3: note: in expansion of macro ‘D_RW’
+   D_RW(map)->root = node;
+   ^
+../../../include/libpmemobj.h:330:41: error: request for member ‘oid’ in something not a structure or union
+ (typeof(*(o)._type) *)pmemobj_direct((o).oid); })
+                                         ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:330:3: note: in expansion of macro ‘D_RW’
+   D_RW(map)->root = node;
+   ^
+../../../include/libpmemobj.h:329:14: error: variable ‘_o’ set but not used [-Werror=unused-but-set-variable]
+ {typeof((o)) _o; _o.oid = _o.oid;\
+              ^
+../../../include/libpmemobj.h:333:14: note: in expansion of macro ‘DIRECT_RW’
+ #define D_RW DIRECT_RW
+              ^
+btree_map.c:330:3: note: in expansion of macro ‘D_RW’
+   D_RW(map)->root = node;
+   ^
+cc1: all warnings being treated as errors
+make: *** [btree_map.o] Error 1
