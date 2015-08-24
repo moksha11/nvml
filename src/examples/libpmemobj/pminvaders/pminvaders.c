@@ -46,7 +46,7 @@
 
 #define	LAYOUT_NAME "pminvaders"
 
-#define	PMINVADERS_POOL_SIZE	(100 * 1024 * 1024) /* 100 megabytes */
+#define	PMINVADERS_POOL_SIZE	(1024 * 1024 * 1024) /* 100 megabytes */
 
 #define	GAME_WIDTH	30
 #define	GAME_HEIGHT	30
@@ -354,14 +354,13 @@ main(int argc, char *argv[])
 	}
 
 	const char *path = argv[1];
-
 	pop = NULL;
 
 	srand(time(NULL));
 
 	if (access(path, F_OK) != 0) {
 		if ((pop = pmemobj_create(path, POBJ_LAYOUT_NAME(pminvaders),
-		    PMINVADERS_POOL_SIZE, S_IWUSR | S_IRUSR)) == NULL) {
+		    PMINVADERS_POOL_SIZE, 0666)) == NULL) {
 			printf("failed to create pool\n");
 			return 1;
 		}

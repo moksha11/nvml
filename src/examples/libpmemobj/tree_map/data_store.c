@@ -57,7 +57,8 @@ static uint64_t nkeys;
 static uint64_t keys[MAX_INSERTS];
 
 struct store_item {
-	uint8_t item_data[ELEMENTSZ];
+	//uint8_t item_data[ELEMENTSZ];
+	uint64_t item_data;
 };
 
 struct store_root {
@@ -162,7 +163,7 @@ int main(int argc, const char *argv[]) {
 			TX_BEGIN(pop) {
 			//fprintf(stdout,"calling transactions \n");
 			/* new_store_item is transactional! */
-			tree_map_insert(pop, D_RO(root)->map, rand(),
+			tree_map_insert(pop, D_RO(root)->map, i,
 				new_store_item().oid);
 			}TX_END
 		}

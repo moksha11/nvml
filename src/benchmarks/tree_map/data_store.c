@@ -142,12 +142,14 @@ int main(int argc, const char *argv[]) {
 			return 1;
 		}
 #ifdef TEST_RESTART
+#if 0
 		TOID(struct store_root) root = POBJ_ROOT(pop, struct store_root);
 		/* count the items */
 		if (!TOID_IS_NULL(D_RO(root)->map)){
 			tree_map_foreach(D_RO(root)->map, get_keys, NULL);
 		}
 		//exit(0);
+#endif
 #endif
 	}
 

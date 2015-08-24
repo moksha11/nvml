@@ -82,7 +82,7 @@ LIBS_DESTDIR = $(DESTDIR)/$(LIBDIR)/$(LIBS_DIR)
 CFLAGS += $(EAPFLAGS)
 
 ifeq ($(DEBUG),1)
-CFLAGS += -g #-pg #-O0 -ggdb -DDEBUG -pg
+CFLAGS += -g #-pg #-O0 -ggdb -DDEBUG #-pg
 LIBS_DIR = nvml_debug
 OBJDIR = debug
 else
