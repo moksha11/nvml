@@ -763,6 +763,15 @@ list_insert_new(PMEMobjpool *pop, struct list_head *oob_head,
 	uint64_t obj_offset = section->obj_offset;
 	uint64_t obj_doffset = obj_offset + OBJ_OOB_SIZE;
 
+#ifdef _DISABLE_LOGGING
+	if (oidp != NULL) {
+		oidp->off = obj_doffset;
+		oidp->pool_uuid_lo = pop->uuid_lo;
+		ret=0;
+		goto err_pmalloc;
+	}
+#endif
+
 	struct list_entry *oob_entry_ptr =
 		(struct list_entry *)OBJ_OFF_TO_PTR(pop,
 			obj_offset + OOB_ENTRY_OFF);
@@ -993,7 +1002,6 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 			goto err_lock;
 		}
 	}
-
 	struct lane_list_section *section =
 		(struct lane_list_section *)lane_section->layout;
 	uint64_t sec_off_off = OBJ_PTR_TO_OFF(pop, &section->obj_offset);
@@ -1002,6 +1010,11 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 
 	uint64_t obj_doffset = oidp->off;
 	uint64_t obj_offset = obj_doffset - OBJ_OOB_SIZE;
+
+#ifdef _DISABLE_LOGGING
+	if(tx_is_relaxedlog())
+		goto eap_goto_free;
+#endif
 
 	struct list_entry *oob_entry_ptr =
 		(struct list_entry *)OBJ_OFF_TO_PTR(pop,
@@ -1043,13 +1056,22 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 	redo_log_store_last(pop, redo, redo_index, sec_off_off, obj_offset);
 
 	ASSERT(redo_index <= REDO_NUM_ENTRIES);
+
 	redo_log_process(pop, redo, REDO_NUM_ENTRIES);
+
 
 	/*
 	 * Don't need to fill next and prev offsets of removing element
 	 * because the element is freed.
 	 */
-	if ((errno = pfree(pop, &section->obj_offset))) {
+	//if ((errno = pfree(pop, &section->obj_offset))) {
+#ifdef _DISABLE_LOGGING
+	eap_goto_free:
+	if ((errno = pfree(pop, &obj_doffset))) {
+#else
+	if ((errno = pfree(pop, &obj_doffset))) {
+#endif
+
 		ERR("!pfree");
 		ret = -1;
 	} else {

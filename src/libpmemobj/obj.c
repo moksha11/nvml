@@ -437,6 +437,14 @@ err:
 	return NULL;
 }
 
+#ifdef _ENABLE_EAP
+#define EAP_UNDO_PATH "/tmp/ramdisk/eapundo"
+#define EAP_UNDO_POOLSZ 50*1024*1024
+size_t undo_poolsize;
+int eapundo_fd;
+#endif
+
+
 /*
  * pmemobj_create -- create a transactional memory pool
  */
@@ -452,13 +460,24 @@ pmemobj_create(const char *path, const char *layout, size_t poolsize,
 	if (poolsize != 0) {
 		/* create a new memory pool file */
 		fd = util_pool_create(path, poolsize, PMEMOBJ_MIN_POOL, mode);
+#ifdef _ENABLE_EAP
+		//eapundo_fd = util_pool_create(EAP_UNDO_PATH,EAP_UNDO_POOLSZ, PMEMOBJ_MIN_POOL, mode);
+#endif
 		created = 1;
 	} else {
 		/* open an existing file */
 		fd = util_pool_open(path, &poolsize, PMEMOBJ_MIN_POOL);
+#ifdef _ENABLE_EAP
+		//eapundo_fd = util_pool_open(EAP_UNDO_PATH, &undo_poolsize, PMEMOBJ_MIN_POOL);
+#endif
 	}
 	if (fd == -1)
 		return NULL;	/* errno set by util_pool_create/open() */
+
+#ifdef _ENABLE_EAP
+	//if (eapundo_fd == -1)
+	//	return NULL;	/* errno set by util_pool_create/open() */
+#endif
 
 	PMEMobjpool *pop = pmemobj_map_common(fd, layout, poolsize, 0, 1, 1);
 	if (pop == NULL && created)
@@ -1061,7 +1080,10 @@ pmemobj_memset_persist(PMEMobjpool *pop, void *dest, int c, size_t len)
 void
 pmemobj_persist(PMEMobjpool *pop, void *addr, size_t len)
 {
+#ifdef _DISABLE_LOGGING
+#else
 	pop->persist(addr, len);
+#endif
 }
 
 /*

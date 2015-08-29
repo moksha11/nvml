@@ -33,7 +33,7 @@
 #
 # examples/libpmemobj/pmemlog/Makefile -- build obj implementations of pmemlog
 #
-PROGS = obj_pmemlog obj_pmemlog_macros obj_pmemlog_minimal obj_pmemlog_simple
+PROGS = obj_pmemlog obj_pmemlog_macros obj_pmemlog_minimal obj_pmemlog_simple obj_pmemlog_sudarsun
 
 INCDIR ?= ../../../include
 LIBDIR ?= ../../../debug
@@ -72,6 +72,9 @@ obj_pmemlog_macros: obj_pmemlog_macros.o
 obj_pmemlog_minimal: obj_pmemlog_minimal.o
 
 obj_pmemlog_simple: obj_pmemlog_simple.o
+
+obj_pmemlog_sudarsun: obj_pmemlog_sudarsun.o
+
 
 $(DIRS):
 	$(MAKE) -C $@ $(TARGET)

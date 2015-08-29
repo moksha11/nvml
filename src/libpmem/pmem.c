@@ -463,6 +463,7 @@ pmem_msync(void *addr, size_t len)
 //#ifndef _DISABLE_LOGGING
 	//if ((ret = msync((void *)uptr, len, MS_SYNC)) < 0)
 	//	ERR("!msync");
+	//fprintf(stderr,"pmem_msync: Persisting %zu bytes\n", len);
 	pmem_persist(addr,len);
 //#endif
 	/* full flush, commit */

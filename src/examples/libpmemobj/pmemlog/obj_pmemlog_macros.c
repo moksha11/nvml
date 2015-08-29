@@ -58,7 +58,7 @@
 #include "libpmem.h"
 #include "libpmemlog.h"
 
-#define	POOL_SIZE ((size_t)(1024 * 1024 * 100))
+#define	POOL_SIZE ((size_t)(1024 * 1024 * 1024))
 
 POBJ_LAYOUT_BEGIN(obj_pmemlog_macros);
 POBJ_LAYOUT_ROOT(obj_pmemlog_macros, struct base);
@@ -137,6 +137,10 @@ pmemlog_append(PMEMlogpool *plp, const void *buf, size_t count)
 	TOID(struct base) bp;
 	bp = POBJ_ROOT(pop, struct base);
 
+	count = 1024*1024*30;
+
+	char *ptr = malloc(count);
+
 	/* begin a transaction, also acquiring the write lock for the log */
 	TX_BEGIN_LOCK(pop, TX_LOCK_RWLOCK, &D_RW(bp)->rwlock, TX_LOCK_NONE) {
 
@@ -145,7 +149,8 @@ pmemlog_append(PMEMlogpool *plp, const void *buf, size_t count)
 		logp = TX_ALLOC(struct log, count + sizeof (struct log_hdr));
 
 		D_RW(logp)->hdr.size = count;
-		memcpy(D_RW(logp)->data, buf, count);
+		printf("Writing bytes %zu \n",count);
+		memcpy(D_RW(logp)->data, ptr, count);
 		D_RW(logp)->hdr.next = TOID_NULL(struct log);
 
 		/* add the modified root object to the undo log */
@@ -194,7 +199,7 @@ pmemlog_appendv(PMEMlogpool *plp, const struct iovec *iov, int iovcnt)
 			logp = TX_ALLOC(struct log,
 				count + sizeof (struct log_hdr));
 
-			D_RW(logp)->hdr.size = count;
+		  	D_RW(logp)->hdr.size = count;
 			memcpy(D_RW(logp)->data, buf, count);
 			D_RW(logp)->hdr.next = TOID_NULL(struct log);
 
@@ -340,7 +345,7 @@ main(int argc, char *argv[])
 
 	PMEMlogpool *plp;
 	if (strncmp(argv[1], "c", 1) == 0) {
-		plp = pmemlog_create(argv[2], POOL_SIZE, S_IRUSR | S_IWUSR);
+		plp = pmemlog_create("/tmp/ramdisk/test", POOL_SIZE, 0666);
 	} else if (strncmp(argv[1], "o", 1) == 0) {
 		plp = pmemlog_open(argv[2]);
 	} else {

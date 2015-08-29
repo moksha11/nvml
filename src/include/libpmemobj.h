@@ -751,6 +751,21 @@ enum pobj_tx_stage {
 	MAX_TX_STAGE
 };
 
+
+/*
+ * Transactions
+ *
+ * Logtype are changed only by the pmemobj_tx_* functions
+ */
+enum pobj_tx_logtype {
+	TX_LOG_NONE,	/* No logging at */
+	TX_LOG_NODATA,	/* No data logging */
+	TX_LOG_REDO		/* Use purely logging */
+};
+
+enum pobj_tx_logtype pmemobj_tx_logtype();
+int tx_is_relaxedlog();
+
 /*
  * Always returns the current transaction stage for a thread.
  */
