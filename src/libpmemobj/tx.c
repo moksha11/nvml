@@ -152,7 +152,7 @@ int tx_set_log_mode() {
 		tx.logtype = TX_LOG_UNDO_FULL;
 	}
 	//currtype = TX_LOG_UNDO_FULL;
-	//tx.logtype = TX_LOG_NODATA;
+	tx.logtype = TX_LOG_NODATA;
 	/*if(currtype != TX_LOG_NODATA) {
 		currtype = TX_LOG_NODATA;
 	}else {

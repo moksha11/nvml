@@ -19,36 +19,66 @@ FlushDisk()
 	sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"
 }
 
-#APPBASE=$BASE/tree_map
-#APP=$APPBASE/data_store_btree
 
-#APPBASE=$BASE/hashset
-#APP=$APPBASE/hashset_tx
 
+RUNEXPERIMENT() {
+	#PARAM="8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32786 65572"
+	CPUS=4
+
+	mkdir $RESULTS
+
+	rm $RESULTS/$resultout
+
+	for ELEMENTSIZE  in `echo $PARAM`
+	do
+		sudo rm  $INPUTFILE
+		FlushDisk
+		cd $APPBASE
+		#/home/sudarsun/Dropbox/nvml/src/killer.sh &
+		$APP_PREFIX "taskset --cpu-list 4,5,6,7 $APP $INPUTFILE"
+		#gprof "$APP $INPUTFILE"
+		#gprof $APP
+	done
+}
+
+echo "**********BTREE**************"
+echo " "
+echo " "
+echo " "
+APPBASE=$BASE/tree_map
+APP=$APPBASE/data_store_btree
+PARAM=$1
+#RUNEXPERIMENT
+
+
+echo "**********HASHSET**************"
+echo " "
+echo " "
+echo " "
+APPBASE=$BASE/hashset
+APP=$APPBASE/hashset_tx
+PARAM=$1
+#RUNEXPERIMENT
+
+echo "**********BINARY TREE**************"
+echo " "
+echo " "
+echo " "
 APPBASE=$BASE/btree_eap
 APP=$APPBASE/btree
-
-
-
 PARAM=$1
-#PARAM="8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32786 65572"
-CPUS=4
+#RUNEXPERIMENT
 
-mkdir $RESULTS
 
-rm $RESULTS/$resultout
-
-for ELEMENTSIZE  in `echo $PARAM`
-do
-sudo rm  $INPUTFILE
-FlushDisk
+echo "**********SNAPPY*************"
+echo " "
+echo " "
+echo " "
+APPBASE=$BASE/snappy
+APP=$APPBASE/run_snappy.sh
 cd $APPBASE
-#~/devel/nvmalloc/scripts/likwid_instrcnt.sh "taskset --cpu-list 1,2,3,4 $APP -i -e $ELEMENTSIZE $THREADCOUNT $OPS $INPUTFILE" &>> $RESULTS/$resultout
-#LD_PRELOAD=/usr/lib/librdpmc.so 
-#/home/sudarsun/Dropbox/nvml/src/killer.sh &
-time taskset --cpu-list 1,2,3,4 $APP $INPUTFILE
-#gprof "$APP $INPUTFILE"
-#gprof $APP
-done
+$APP
+
+
 
 
