@@ -45,9 +45,10 @@ POBJ_LAYOUT_ROOT(btree, struct btree);
 POBJ_LAYOUT_TOID(btree, struct btree_node);
 POBJ_LAYOUT_END(btree);
 
+#define	POOLSIZE 1024*1024*1024
 #define ITEM_COUNT 50000
 #define	KEYLEN 64
-#define	VALUELEN 64
+#define	VALUELEN 8
 
 unsigned int nr_inserts;
 unsigned int nr_find_failure;
@@ -189,7 +190,7 @@ void operation(PMEMobjpool *pop, uint64_t key_64,
 		btree_print(pop);
 		break;
 	case 'i':
-		gen_random(value, VALUELEN);
+		//gen_random(value, VALUELEN);
 		if(value){
 			btree_insert(pop, key_64, (const char *)value);
 			nr_inserts++;
@@ -227,7 +228,7 @@ main(int argc, char *argv[])
 
 	if (access(path, F_OK) != 0) {
 		if ((pop = pmemobj_create(path, POBJ_LAYOUT_NAME(btree),
-				1024*1024*512, 0666)) == NULL) {
+				POOLSIZE, 0666)) == NULL) {
 			fprintf(stderr,"failed to create pool %s\n", path);
 			return 1;
 		}
