@@ -33,13 +33,9 @@
 #
 # examples/libpmemobj/Makefile -- build the libpmemobj examples
 #
-PROGS = manpage btree pi
-DIRS = pminvaders pmemlog pmemblk string_store string_store_tx\
-	string_store_tx_type hashset tree_map tree_map_notx snappy \
-	btree_eap
-
-INCDIR ?= ../../include
-LIBDIR ?= ../../debug
+PROGS =btree
+INCDIR ?= ../../../include
+LIBDIR ?= ../../../nondebug
 
 INCS = -I$(INCDIR)
 LIBS = -Wl,-rpath=$(LIBDIR) -L$(LIBDIR) -lpmemobj -lpmem -pthread -lm
@@ -55,7 +51,7 @@ all: $(PROGS) $(DIRS)
 
 
 clean: $(DIRS)
-	$(RM) *.o core a.out
+	$(RM) *.o btree
 
 clobber: clean $(DIRS)
 	$(RM) $(PROGS)
@@ -69,9 +65,7 @@ cstyle: $(DIRS)
 $(PROGS):
 	$(CC) -o $@ $< $(LIBS)
 
-manpage: manpage.o
 btree: btree.o
-pi: pi.o
 
 $(DIRS):
 	$(MAKE) -C $@ $(TARGET)

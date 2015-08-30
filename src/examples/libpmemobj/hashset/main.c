@@ -41,7 +41,7 @@
 
 #include "hashset.h"
 
-#define ITEM_COUNT 1000000
+#define ITEM_COUNT 500000
 #define	PM_HASHSET_POOL_SIZE	(1024 * 1024 * 1024)
 
 static PMEMobjpool *pop;

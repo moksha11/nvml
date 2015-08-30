@@ -105,6 +105,7 @@ struct tx_add_range_args {
 
 #ifndef _DISABLE_LOGGING
 int tx_set_log_mode() {
+	return 0;
 }
 #endif
 
