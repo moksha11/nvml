@@ -137,7 +137,7 @@ static int pmc_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 			/* set counter 1 */
 			setCounter(2, arg);
 			break;
-		case 23:
+		case 3:
 			/* disable counter */
 			setCounter(3, 0);
 			pmc_clear(3);

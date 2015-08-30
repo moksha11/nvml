@@ -295,7 +295,7 @@ hs_print(PMEMobjpool *pop)
 	TOID(struct buckets) buckets = D_RO(hashset)->buckets;
 	TOID(struct entry) var;
 
-	printf("count: %lu\n", D_RO(hashset)->count);
+	//printf("count: %lu\n", D_RO(hashset)->count);
 	for (size_t i = 0; i < D_RO(buckets)->nbuckets; ++i) {
 		if (TOID_IS_NULL(D_RO(buckets)->bucket[i]))
 			continue;

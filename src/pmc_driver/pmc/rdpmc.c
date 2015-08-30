@@ -17,7 +17,7 @@
 
 #include <sched.h>
 
-//#define NOEMULATE_LATENCY
+#define NOEMULATE_LATENCY
 
 
 int enable_monitoring;
@@ -36,11 +36,12 @@ int initalized;
 #define CTRL_SET_UM(val, m) (val |= (m << 8))
 #define CTRL_SET_EVENT(val, e) (val |= e)
 
-static pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
+//static pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
 
 typedef unsigned long long hrtime_t;
 
 long long start0, start1, start2, start3, stop0, stop1, stop2, stop3;
+long long diffstop0, diffstop1, diffstop2;
 
 static void con() __attribute__((constructor));
 static inline unsigned long long hrtime_cycles(void);
@@ -190,7 +191,7 @@ int init_monitoring(){
 	//CTRL_SET_INT(eventId[0]);
 	//CTRL_SET_ENABLE(eventId[0]);
 	//eventId[3] = 0x5301cb;
-	pmc_init(eventId, 1);
+	pmc_init(eventId, 3);
 
 #ifndef NOEMULATE_LATENCY
 	/* Configure the timer to expire after 10 msec... */
@@ -269,8 +270,8 @@ int start_perf_monitoring(){
 	//CTRL_SET_UM(eventId[2], 0x04);
 	//CTRL_SET_INT(eventId[2]);
 	//CTRL_SET_ENABLE(eventId[2]);
-	//eventId[2] = 0x5302cb;
-	eventId[2] = 0x53200f;
+	eventId[2] = 0x5302cb;
+	//eventId[2] = 0x53200f;
 
 	// Event CYCLE_ACTIVITY:STALLS_L2_PENDING
 	//CTRL_SET_EVENT(eventId[0], 0xa3);
@@ -305,6 +306,7 @@ int start_perf_monitoring(){
                  start0,
                  start1,
                  start2);*/
+
 #endif
 	return 0;
 }
@@ -313,9 +315,24 @@ int start_perf_monitoring(){
 void get_counter_diff(long long *instrcntr, 
 		      long long *nvmstores, 
 		      long long *nvmloads){
-	*instrcntr = stop0-start0;
+
+
+	*instrcntr =  diffstop0;
+	*nvmstores =diffstop1;
+	*nvmloads = diffstop2;
+
+#if 0
+	*instrcntr =  stop0-start0;
 	*nvmstores = stop1-start1;
 	*nvmloads = stop2-start2;
+#endif
+
+	 printf("get_counter_diff instructions: %lld\t "
+              "llc store misses: %lld\t"
+              "llc load misses: %lld \n",
+              *instrcntr,
+              *nvmstores,
+              *nvmloads);
 }
 
 int stop_perf_monitoring(){
@@ -335,14 +352,19 @@ int stop_perf_monitoring(){
 	stop2 = rdpmc(2);
 #endif
 
-	printf("Stop monitoring Instructions: %llu\t "
-				 "LLC Store Misses: %llu\t"
-				 "LLC Load Misses: %llu \n",
+	/*printf("stop monitoring instructions: %llu\t "
+				 "llc store misses: %llu\t"
+				 "llc load misses: %llu \n",
 				 stop0,
 				 stop1,
-				 stop2);
+				 stop2);*/
 
 	enable_monitoring = 0;
+	diffstop0 =  stop0-start0;
+	diffstop1 = stop1-start1;
+	diffstop2 = stop2-start2;
+
+
 	/*start0 = 0;
 	start1 = 0;
 	start2 = 0;

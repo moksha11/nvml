@@ -42,7 +42,7 @@
 #include "hashset.h"
 
 #define ITEM_COUNT 1000000
-#define	PM_HASHSET_POOL_SIZE	(512 * 1024 * 1024)
+#define	PM_HASHSET_POOL_SIZE	(1024 * 1024 * 1024)
 
 static PMEMobjpool *pop;
 
@@ -253,7 +253,7 @@ main(int argc, char *argv[])
 	{
 		gen_insert_val(buf,i,'i');
 		operation(buf);
-		printf("%s \n",buf);
+		//printf("%s \n",buf);
 	}
 	/*****************************************************************************/
 	pmemobj_close(pop);

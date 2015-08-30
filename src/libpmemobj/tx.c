@@ -103,14 +103,18 @@ struct tx_add_range_args {
 };
 
 
+#ifndef _DISABLE_LOGGING
+int tx_set_log_mode() {
+}
+#endif
 
 #ifdef _DISABLE_LOGGING
 #define MONITORINGFREQ 100000
 #define RELAX_LOGGING 1
 #define EAP_UNDO_MAX 1024
 
-long long instr_budget =4000000000;
-long long llcstoremiss_budget =900000000;
+long long instr_budget =2003141586;
+long long llcstoremiss_budget =4004458;
 long long llcloadmiss_budget =0;
 
 long long prev_instr, prev_llcstoremiss;
@@ -137,7 +141,7 @@ int tx_set_log_mode() {
 
 	long long curr_instr, curr_llcstoremiss, curr_llcloadmiss;
 	get_counter_diff(&curr_instr,&curr_llcstoremiss,&curr_llcloadmiss);
-	if((instr_budget < curr_instr) && (llcstoremiss_budget < curr_llcstoremiss)){
+	if((instr_budget < curr_instr) || (llcstoremiss_budget < curr_llcstoremiss)){
 		relaxdatalog = RELAX_LOGGING;
 		tx.logtype = TX_LOG_NODATA;
 		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
@@ -146,15 +150,16 @@ int tx_set_log_mode() {
 		relaxdatalog = 0;
 		tx.logtype = TX_LOG_UNDO_FULL;
 	}
+	//currtype = TX_LOG_UNDO_FULL;
 	//tx.logtype = TX_LOG_NODATA;
 	
-	if(currtype != TX_LOG_NODATA) {
+	/*if(currtype != TX_LOG_NODATA) {
 		currtype = TX_LOG_NODATA;
 	}else {
 		currtype = TX_LOG_UNDO_FULL;
 	}
 	 //tx.logtype = currtype;
-	 tx.logtype = TX_LOG_NODATA;
+	 tx.logtype = TX_LOG_NODATA;*/
   	 //fprintf(stderr,"relaxdatalog %d \n",tx.logtype);
 #if 0
 	get_perf_counter(&curr_instr,&curr_llcstoremiss);
@@ -201,29 +206,9 @@ int tx_set_log_mode() {
 }
 
 
-
-int tx_is_relaxedlog() {
-
-	//fprintf(stderr,"tx_is_relaxedlog %d \n",tx.logtype);
-	if(tx.logtype ==TX_LOG_NODATA) {
-		nr_relaxed_logs++;
-		return 1;
-	}else {
-		nr_completed_logs++;
-		return 0;
-	}
-
-	//if(relaxdatalog)
-	//fprintf(stderr,"tx_is_relaxedlog %d \n",relaxdatalog);
-
-	//return relaxdatalog;
-	//return RELAX_LOGGING;
-	//return 0;
-}
-
 void reset_log_mode() {
 	relaxdatalog = 0;
-	tx.logtype = TX_LOG_UNDO_FULL;
+	//tx.logtype = TX_LOG_UNDO_FULL;
 }
 
 void tx_start_monitoring(){
@@ -1162,7 +1147,7 @@ pmemobj_tx_begin(PMEMobjpool *pop, jmp_buf env, ...)
 #ifdef _DISABLE_LOGGING
 	//print_stats();
 	reset_log_mode();
-	tx_set_log_mode();
+	//tx_set_log_mode();
 	tx_start_monitoring();
 #endif
 
