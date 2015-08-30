@@ -138,6 +138,16 @@ struct eap_undo_record eap_undo[EAP_UNDO_MAX];
 
 int currtype;
 
+
+int tx_is_relaxedlog(){
+
+	if(tx.logtype == TX_LOG_NODATA)
+		return 1;
+	else
+		return 1;
+}
+
+
 int tx_set_log_mode() { 
 
 	long long curr_instr, curr_llcstoremiss, curr_llcloadmiss;
@@ -145,9 +155,9 @@ int tx_set_log_mode() {
 	if((instr_budget < curr_instr) || (llcstoremiss_budget < curr_llcstoremiss)){
 		relaxdatalog = RELAX_LOGGING;
 		tx.logtype = TX_LOG_NODATA;
-		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+		printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 	}else {
-		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+		printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 		relaxdatalog = 0;
 		tx.logtype = TX_LOG_UNDO_FULL;
 	}
@@ -702,9 +712,9 @@ tx_pre_commit_set(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
 #ifdef _DISABLE_LOGGING
-	//if(tx_is_relaxedlog()){
-		//return;
-	//}
+	if(tx_is_relaxedlog()){
+		return;
+	}
 #endif
 	PMEMoid iter;
 	for (iter = layout->undo_set.pe_first; !OBJ_OID_IS_NULL(iter);
@@ -1107,6 +1117,7 @@ pmemobj_tx_begin(PMEMobjpool *pop, jmp_buf env, ...)
 	//print_stats();
 	reset_log_mode();
 	//tx_set_log_mode();
+	//printf("pmemobj_tx_begin \n");
 	tx_start_monitoring();
 #endif
 
