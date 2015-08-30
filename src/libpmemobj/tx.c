@@ -147,7 +147,6 @@ int tx_set_log_mode() {
 		tx.logtype = TX_LOG_UNDO_FULL;
 	}
 	//tx.logtype = TX_LOG_NODATA;
-	
 	if(currtype != TX_LOG_NODATA) {
 		currtype = TX_LOG_NODATA;
 	}else {
@@ -156,47 +155,6 @@ int tx_set_log_mode() {
 	 //tx.logtype = currtype;
 	 tx.logtype = TX_LOG_NODATA;
   	 //fprintf(stderr,"relaxdatalog %d \n",tx.logtype);
-#if 0
-	get_perf_counter(&curr_instr,&curr_llcstoremiss);
-
-	if(prev_instr == 0 || prev_llcstoremiss == 0) {
-		prev_instr = curr_instr;
-		prev_llcstoremiss = curr_llcstoremiss;
-		goto dontrelax;
-	}
-
-	if(prev_llcstoremiss < curr_llcstoremiss) {
-
-		/*double llc_incr_percent=0;
-		llc_incr_percent = ((double)(curr_llcstoremiss -prev_llcstoremiss)/
-											(double)prev_llcstoremiss)*100;
-		fprintf(stderr,"curr_llcstoremiss %lu "
-					   "prev_llcstoremiss %lu "
-					   "diff %lu "
-					   "Increase per %lf\n",
-						curr_llcstoremiss, 
-						prev_llcstoremiss,
-						curr_llcstoremiss - prev_llcstoremiss,
-						llc_incr_percent);*/
-		prev_log_mode = 0;
-		goto dontrelax;
-	}
-
-	if(prev_llcstoremiss == curr_llcstoremiss) {
-		if(prev_log_mode != RELAX_LOGGING)
-			goto dontrelax;
-	}
-
-	relaxdatalog = RELAX_LOGGING;
-	prev_log_mode = RELAX_LOGGING;
-	goto returnset;
-	dontrelax:
-	relaxdatalog = 0;
-	returnset:
-	prev_llcstoremiss = curr_llcstoremiss;
-	prev_instr = curr_instr;
-	return 0;
-#endif
 	return 0;
 }
 
