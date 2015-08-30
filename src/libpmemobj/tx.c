@@ -125,7 +125,9 @@ int nr_relaxed_logs=0;
 int nr_completed_logs=0;
 int nr_txcount=0;
 int nr_txcount_start=0;
+int first_epoch=1;
 uint64_t nr_eap_undo_count;
+int nxt_epoch_log_mode=TX_LOG_NODATA;
 
 struct eap_undo_record {
 	PMEMoid eap_undo_oid;
@@ -135,10 +137,9 @@ struct eap_undo_record {
 };
 
 struct eap_undo_record eap_undo[EAP_UNDO_MAX];
-
 int currtype;
 
-
+/*check if transaction is a relaxed log*/
 int tx_is_relaxedlog(){
 
 	if(tx.logtype == TX_LOG_NODATA)
@@ -147,30 +148,56 @@ int tx_is_relaxedlog(){
 		return 1;
 }
 
+void set_epoch_budget(long long instr,
+					  long long storemiss,
+					  long long loadmiss){
+
+	instr_budget = instr;
+	llcstoremiss_budget = storemiss;
+	llcloadmiss_budget = loadmiss;
+	printf("Budget set to %lld %lld %lld \n",
+			instr_budget,llcstoremiss_budget,llcloadmiss_budget);
+}
+
 
 int tx_set_log_mode() { 
 
+	//tx.logtype = TX_LOG_NODATA;
+	tx.logtype = nxt_epoch_log_mode;
+	return tx.logtype;
+}
+
+/*This is set after end of a specific count or
+ * number of transactions
+ */
+int set_nxtepoch_logmode() {
+
 	long long curr_instr, curr_llcstoremiss, curr_llcloadmiss;
+
 	get_counter_diff(&curr_instr,&curr_llcstoremiss,&curr_llcloadmiss);
-	if((instr_budget < curr_instr) || (llcstoremiss_budget < curr_llcstoremiss)){
-		relaxdatalog = RELAX_LOGGING;
-		tx.logtype = TX_LOG_NODATA;
-		printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+
+	if(first_epoch) {
+		set_epoch_budget(curr_instr,
+				curr_llcstoremiss,
+				curr_llcloadmiss);
+		/*Full transaction by default*/
+		nxt_epoch_log_mode = TX_LOG_UNDO_FULL;
+		first_epoch =0;
+	}
+
+
+	/*We are worried only about CPU instructions and NVM stores*/
+	if((instr_budget < curr_instr) ||
+			(llcstoremiss_budget < curr_llcstoremiss)){
+		nxt_epoch_log_mode = TX_LOG_NODATA;
+		printf("Relaxing %lld %lld %lld \n",
+				curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 	}else {
-		printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",
+		//curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 		relaxdatalog = 0;
-		tx.logtype = TX_LOG_UNDO_FULL;
+		nxt_epoch_log_mode = TX_LOG_UNDO_FULL;
 	}
-	//currtype = TX_LOG_UNDO_FULL;
-	tx.logtype = TX_LOG_NODATA;
-	/*if(currtype != TX_LOG_NODATA) {
-		currtype = TX_LOG_NODATA;
-	}else {
-		currtype = TX_LOG_UNDO_FULL;
-	}
-	 //tx.logtype = currtype;
-	 tx.logtype = TX_LOG_NODATA;*/
-  	 //fprintf(stderr,"relaxdatalog %d \n",tx.logtype);
 	return 0;
 }
 
@@ -194,10 +221,12 @@ void tx_stop_monitoring(){
 
 	if(nr_txcount_start % MONITORINGFREQ == 0) {
 		stop_perf_monitoring();
-		//tx_set_log_mode();
+		/*By this time we know the CPU instructions and
+		 * NVM store access information
+		 */
+		set_nxtepoch_logmode();
 		nr_txcount = 0;
 	}
-	//nr_txcount++;
 }
 
 void print_stats(){
