@@ -142,10 +142,14 @@ int currtype;
 /*check if transaction is a relaxed log*/
 int tx_is_relaxedlog(){
 
-	if(tx.logtype == TX_LOG_NODATA)
+	if(tx.logtype == TX_LOG_NODATA) {
+		nr_relaxed_logs++;
 		return 1;
-	else
-		return 1;
+	}
+	else{
+		nr_completed_logs++;
+		return 0;
+	}
 }
 
 void set_epoch_budget(long long instr,
