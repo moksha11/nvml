@@ -520,6 +520,9 @@ tree_map_foreach_node(const TOID(struct tree_map_node) p,
 		if (tree_map_foreach_node(D_RO(p)->slots[i], cb, arg) != 0)
 			return 1;
 
+		//if((unsigned int)D_RO(p)->items[i].key)
+		//printf("%u\n",(unsigned int)D_RO(p)->items[i].key);
+
 		if (i != D_RO(p)->n && D_RO(p)->items[i].key != 0) {
 			if (cb(D_RO(p)->items[i].key, D_RO(p)->items[i].value,
 					arg) != 0)

@@ -17,11 +17,12 @@
 
 #include <sched.h>
 
-#define NOEMULATE_LATENCY
+//#define NOEMULATE_LATENCY
 
-#ifdef NOEMULATE_LATENCY
+
 int enable_monitoring;
 int initalized;
+#ifdef NOEMULATE_LATENCY
 #endif
 
 #define PMC_USER_MASK    0x00010000
@@ -35,7 +36,7 @@ int initalized;
 #define CTRL_SET_UM(val, m) (val |= (m << 8))
 #define CTRL_SET_EVENT(val, e) (val |= e)
 
-//static pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
 
 typedef unsigned long long hrtime_t;
 
@@ -164,7 +165,7 @@ int init_monitoring(){
 	//CTRL_SET_UM(eventId[1], 0x02);
 	//CTRL_SET_INT(eventId[1]);
 	//CTRL_SET_ENABLE(eventId[1]);
-	//eventId[1] = 0x5302cb;
+	eventId[1] = 0x5302cb;
 
 	/*Event LLC_STORE MISS*/
 	//Event MEM_LOAD_RETIRED:L2_LINE_IN:BOTH_CORES
@@ -172,7 +173,7 @@ int init_monitoring(){
 	//CTRL_SET_UM(eventId[1], 0x02);
 	//CTRL_SET_INT(eventId[1]);
 	//CTRL_SET_ENABLE(eventId[1]);
-	eventId[1] = 0x10102;
+	//eventId[1] = 0x10102;
 
 	/*Event LLC_LOAD MISS*/
 	//Event MEM_LOAD_RETIRED:LLC_MISS
@@ -180,8 +181,8 @@ int init_monitoring(){
 	//CTRL_SET_UM(eventId[2], 0x04);
 	//CTRL_SET_INT(eventId[2]);
 	//CTRL_SET_ENABLE(eventId[2]);
-	//eventId[2] = 0x5302cb;
-	eventId[2] = 0x53200f;
+	eventId[2] = 0x5302cb;
+	//eventId[2] = 0x53200f;
 
 	// Event CYCLE_ACTIVITY:STALLS_L2_PENDING
 	//CTRL_SET_EVENT(eventId[0], 0xa3);
@@ -189,7 +190,7 @@ int init_monitoring(){
 	//CTRL_SET_INT(eventId[0]);
 	//CTRL_SET_ENABLE(eventId[0]);
 	//eventId[3] = 0x5301cb;
-	pmc_init(eventId, 3);
+	pmc_init(eventId, 1);
 
 #ifndef NOEMULATE_LATENCY
 	/* Configure the timer to expire after 10 msec... */
@@ -223,6 +224,7 @@ void con() {
 #ifndef NOEMULATE_LATENCY
 	start_perf_monitoring();
 #else
+	fprintf(stderr,"Calling init_monitoring\n");
 	init_monitoring();
 #endif
 
@@ -251,7 +253,7 @@ int start_perf_monitoring(){
 	//CTRL_SET_UM(eventId[1], 0x02);
 	//CTRL_SET_INT(eventId[1]);
 	//CTRL_SET_ENABLE(eventId[1]);
-	//eventId[1] = 0x5302cb;
+	eventId[1] = 0x5302cb;
 
 	/*Event LLC_STORE MISS*/
 	//Event MEM_LOAD_RETIRED:L2_LINE_IN:BOTH_CORES
@@ -259,7 +261,7 @@ int start_perf_monitoring(){
 	//CTRL_SET_UM(eventId[1], 0x02);
 	//CTRL_SET_INT(eventId[1]);
 	//CTRL_SET_ENABLE(eventId[1]);
-	eventId[1] = 0x10102;
+	//eventId[1] = 0x10102;
 
 	/*Event LLC_LOAD MISS*/
 	//Event MEM_LOAD_RETIRED:LLC_MISS
@@ -297,7 +299,6 @@ int start_perf_monitoring(){
 	start0 = rdpmc(0);
 	start1 = rdpmc(1);
 	start2 = rdpmc(2);
-
     /*printf("start_perf_monitoring Instructions: %llu\t "
                  "LLC Store Misses: %llu\t"
                  "LLC Load Misses: %llu \n",
@@ -332,13 +333,14 @@ int stop_perf_monitoring(){
 	stop0 = rdpmc(0);
 	stop1 = rdpmc(1);
 	stop2 = rdpmc(2);
+#endif
 
-	/*printf("Stop monitoring Instructions: %llu\t "
+	printf("Stop monitoring Instructions: %llu\t "
 				 "LLC Store Misses: %llu\t"
 				 "LLC Load Misses: %llu \n",
-				 stop0-start0,
-				 stop1-start1,
-				 stop2-start2);*/
+				 stop0,
+				 stop1,
+				 stop2);
 
 	enable_monitoring = 0;
 	/*start0 = 0;
@@ -348,7 +350,7 @@ int stop_perf_monitoring(){
 	stop0 = 0;
 	stop1 = 0;
 	stop2 = 0;*/
-#endif
+//#endif
 	return 0;
 }
 

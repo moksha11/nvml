@@ -39,7 +39,7 @@ INCDIR ?= ../../../include
 LIBDIR ?= ../../../debug
 
 INCS = -I$(INCDIR)
-LIBS = -Wl,-rpath=$(LIBDIR) -L$(LIBDIR) -lpmemobj -pthread
+LIBS = -Wl,-rpath=$(LIBDIR) -L$(LIBDIR) -lpmemobj -pthread -lrdpmc
 CFLAGS = -std=gnu99 -Wall -Werror -g #-pg
 CSTYLE = ../../../../utils/cstyle
 

@@ -107,7 +107,7 @@ int main(int argc, const char *argv[]) {
 
 	if (access(path, F_OK) != 0) {
 		if ((pop = pmemobj_create(path, POBJ_LAYOUT_NAME(data_store),
-			PMEMOBJ_MIN_POOL, 0666)) == NULL) {
+				PMEMOBJ_MIN_POOL, 0666)) == NULL) {
 			perror("failed to create pool\n");
 			return 1;
 		}
@@ -117,31 +117,42 @@ int main(int argc, const char *argv[]) {
 			perror("failed to open pool\n");
 			return 1;
 		}
+		TOID(struct store_root) root = POBJ_ROOT(pop, struct store_root);
+
+		if (!TOID_IS_NULL(D_RO(root)->map)) /* delete the map if it exists */
+		{
+			/* count the items */
+			tree_map_foreach(D_RO(root)->map, get_keys, NULL);
+		}
+#ifdef ENABLE_RESTART
+		fprintf(stderr,"Restart nkeys %lu\n", nkeys);
+		exit(0);
+#endif
 	}
+
 
 	TOID(struct store_root) root = POBJ_ROOT(pop, struct store_root);
 	if (!TOID_IS_NULL(D_RO(root)->map)) /* delete the map if it exists */
 		tree_map_delete(pop, &D_RW(root)->map);
 
 	/* insert random items in a transaction */
-		tree_map_new(pop, &D_RW(root)->map);
+	tree_map_new(pop, &D_RW(root)->map);
 
-		for (int i = 0; i < MAX_INSERTS; ++i) {
+	for (int i = 0; i < MAX_INSERTS; ++i) {
 
 		TX_BEGIN(pop) {
 
 			/* new_store_item is transactional! */
-			tree_map_insert(pop, D_RO(root)->map, rand(),
-				new_store_item().oid);
+			tree_map_insert(pop, D_RO(root)->map, i+1,
+					new_store_item().oid);
 		} TX_END
 
 	}
 
-
+#ifndef ENABLE_RESTART
 	/* count the items */
 	tree_map_foreach(D_RO(root)->map, get_keys, NULL);
 
-//#ifdef ENABLE_RESTART
 	/* remove the items without outer transaction */
 	for (int i = 0; i < nkeys; ++i) {
 		PMEMoid item = tree_map_remove(pop, D_RO(root)->map, keys[i]);
@@ -154,7 +165,22 @@ int main(int argc, const char *argv[]) {
 	/* tree should be empty */
 	tree_map_foreach(D_RO(root)->map, dec_keys, NULL);
 	assert(old_nkeys == nkeys);
-//#endif
+#else
+	/* count the items */
+	tree_map_foreach(D_RO(root)->map, get_keys, NULL);
+	//nkeys = MAX_INSERTS-1;
+	printf("Number of keys to remove %lu \n",nkeys);
+
+	/* remove half the items without outer transaction */
+	//for (int i = 0; i < nkeys/2; ++i) {
+	for (int i = 0; i < nkeys; ++i) {
+		PMEMoid item = tree_map_remove(pop, D_RO(root)->map, keys[i]);
+		assert(!OID_IS_NULL(item));
+		assert(OID_INSTANCEOF(item, struct store_item));
+	}
+#endif
+
+
 	pmemobj_close(pop);
 
 	return 0;

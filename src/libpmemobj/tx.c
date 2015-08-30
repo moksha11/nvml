@@ -120,6 +120,7 @@ int nr_relaxed_logs=0;
 int nr_completed_logs=0;
 int nr_txcount=0;
 int nr_txcount_start=0;
+uint64_t nr_eap_undo_count;
 
 struct eap_undo_record {
 	PMEMoid eap_undo_oid;
@@ -130,6 +131,7 @@ struct eap_undo_record {
 
 struct eap_undo_record eap_undo[EAP_UNDO_MAX];
 
+int currtype;
 
 int tx_set_log_mode() { 
 
@@ -137,12 +139,23 @@ int tx_set_log_mode() {
 	get_counter_diff(&curr_instr,&curr_llcstoremiss,&curr_llcloadmiss);
 	if((instr_budget < curr_instr) && (llcstoremiss_budget < curr_llcstoremiss)){
 		relaxdatalog = RELAX_LOGGING;
-		printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+		tx.logtype = TX_LOG_NODATA;
+		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 	}else {
 		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 		relaxdatalog = 0;
+		tx.logtype = TX_LOG_UNDO_FULL;
 	}
-	//relaxdatalog = RELAX_LOGGING;
+	//tx.logtype = TX_LOG_NODATA;
+	
+	if(currtype != TX_LOG_NODATA) {
+		currtype = TX_LOG_NODATA;
+	}else {
+		currtype = TX_LOG_UNDO_FULL;
+	}
+	 //tx.logtype = currtype;
+	 tx.logtype = TX_LOG_NODATA;
+  	 //fprintf(stderr,"relaxdatalog %d \n",tx.logtype);
 #if 0
 	get_perf_counter(&curr_instr,&curr_llcstoremiss);
 
@@ -191,27 +204,32 @@ int tx_set_log_mode() {
 
 int tx_is_relaxedlog() {
 
+	//fprintf(stderr,"tx_is_relaxedlog %d \n",tx.logtype);
 	if(tx.logtype ==TX_LOG_NODATA) {
 		nr_relaxed_logs++;
+		return 1;
 	}else {
 		nr_completed_logs++;
+		return 0;
 	}
 
 	//if(relaxdatalog)
-	//fprintf(stderr,"relaxdatalog %d \n",relaxdatalog);
+	//fprintf(stderr,"tx_is_relaxedlog %d \n",relaxdatalog);
 
 	//return relaxdatalog;
-	return RELAX_LOGGING;
+	//return RELAX_LOGGING;
 	//return 0;
 }
 
 void reset_log_mode() {
 	relaxdatalog = 0;
+	tx.logtype = TX_LOG_UNDO_FULL;
 }
 
 void tx_start_monitoring(){
 	if(!nr_txcount) {
 		start_perf_monitoring();
+		tx_set_log_mode();
 		nr_txcount = 1;
 	}
 }
@@ -222,7 +240,7 @@ void tx_stop_monitoring(){
 
 	if(nr_txcount_start % MONITORINGFREQ == 0) {
 		stop_perf_monitoring();
-		tx_set_log_mode();
+		//tx_set_log_mode();
 		nr_txcount = 0;
 	}
 	//nr_txcount++;
@@ -232,6 +250,45 @@ void print_stats(){
 	fprintf(stdout,"nr_relaxed_logs %u "
 			"nr_completed_logs %u \n",
 			nr_relaxed_logs, nr_completed_logs);
+}
+
+/*
+ * pmemobj_tx_add_eap_undolog -- adds persistent memory range into the eap's UNDO
+ * transaction log
+ */
+int
+pmemobj_tx_add_eap_undolog(PMEMobjpool *pop, PMEMoid oid, uint64_t hoff, size_t size) {
+
+	int index= nr_relaxed_logs %EAP_UNDO_MAX;
+	eap_undo[index].pop = pop;
+	eap_undo[index].eap_undo_oid = oid;
+	eap_undo[index].hoff = hoff;
+	eap_undo[index].size = size;
+	nr_eap_undo_count++;
+	return 0;
+}
+
+/*
+ * pmemobj_tx_persist_eap_undolog -- persist persistent memory range into the eap's UNDO
+ * transaction log
+ */
+
+int
+pmemobj_tx_persist_eap_undolog(PMEMobjpool *pop) {
+
+	int i=0;
+	//struct tx_add_range_args *args1 = &args;
+	void *ptr=NULL;
+
+	for ( i=0; i < nr_eap_undo_count; i++){
+
+		if(eap_undo[i].pop == pop) {
+			ptr = OBJ_OFF_TO_PTR(eap_undo[i].pop, eap_undo[i].hoff);
+			if(ptr)
+				pmem_msync(ptr, eap_undo[i].size);
+		}
+	}
+	return 0;
 }
 #endif
 
@@ -659,7 +716,7 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 	LOG(3, NULL);
 
 #ifdef _DISABLE_LOGGING
-	if(tx_is_relaxedlog()){ 	
+	if(tx_is_relaxedlog()){
 		return;
 	}
 #endif
@@ -701,9 +758,9 @@ tx_pre_commit_set(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
 #ifdef _DISABLE_LOGGING
-	if(tx_is_relaxedlog()){ 	
-		return;
-	}
+	//if(tx_is_relaxedlog()){
+		//return;
+	//}
 #endif
 	PMEMoid iter;
 	for (iter = layout->undo_set.pe_first; !OBJ_OID_IS_NULL(iter);
@@ -1104,8 +1161,8 @@ pmemobj_tx_begin(PMEMobjpool *pop, jmp_buf env, ...)
 
 #ifdef _DISABLE_LOGGING
 	//print_stats();
-	//reset_log_mode();
-	//tx_set_log_mode();
+	reset_log_mode();
+	tx_set_log_mode();
 	tx_start_monitoring();
 #endif
 
@@ -1353,45 +1410,6 @@ pmemobj_tx_process()
 	return 0;
 }
 
-
-#ifdef _DISABLE_LOGGING
-/*
- * pmemobj_tx_add_eap_undolog -- adds persistent memory range into the eap's UNDO
- * transaction log
- */
-int
-pmemobj_tx_add_eap_undolog(PMEMobjpool *pop, PMEMoid oid, uint64_t hoff, size_t size) {
-
-	int index= nr_relaxed_logs %EAP_UNDO_MAX;
-	eap_undo[index].pop = pop;
-	eap_undo[index].eap_undo_oid = oid;
-	eap_undo[index].hoff = hoff;
-	eap_undo[index].size = size;
-	return 0;
-}
-
-#if 0
-/*
- * pmemobj_tx_persist_eap_undolog -- persist persistent memory range into the eap's UNDO
- * transaction log
- */
-
-int
-pmemobj_tx_persist_eap_undolog(PMEMobjpool *pop) {
-
-	int i=0;
-
-
-	struct tx_add_range_args *args1 = &args;
-	void *ptr=NULL;
-	ptr = OBJ_OFF_TO_PTR(args1->pop, args1->offset);
-	if(ptr)
-		pmem_msync(ptr, args1->size);
-}
-#endif
-
-#endif
-
 /*
  * pmemobj_tx_add_common -- (internal) common code for adding persistent memory
  *				into the transaction
@@ -1473,7 +1491,7 @@ pmemobj_tx_add_range_direct(void *ptr, size_t size)
 
 #ifdef _DISABLE_LOGGING
 	if(tx_is_relaxedlog()){
-		pmemobj_tx_add_eap_undolog(lane->pop, OID_NULL, ptr - (void *)lane->pop, size);
+		//pmemobj_tx_add_eap_undolog(lane->pop, OID_NULL, ptr - (void *)lane->pop, size);
 		return 0;
 	}
 #endif
@@ -1522,7 +1540,7 @@ pmemobj_tx_add_range(PMEMoid oid, uint64_t hoff, size_t size)
 
 #ifdef _DISABLE_LOGGING
 	if(tx_is_relaxedlog()){
-		pmemobj_tx_add_eap_undolog(lane->pop, oid, oid.off + hoff, size);
+		//pmemobj_tx_add_eap_undolog(lane->pop, oid, oid.off + hoff, size);
 		return 0;
 	}
 #endif

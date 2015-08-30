@@ -760,7 +760,8 @@ enum pobj_tx_stage {
 enum pobj_tx_logtype {
 	TX_LOG_NONE,	/* No logging at */
 	TX_LOG_NODATA,	/* No data logging */
-	TX_LOG_REDO		/* Use purely logging */
+	TX_LOG_REDO,		/* Use purely logging */
+	TX_LOG_UNDO_FULL
 };
 
 enum pobj_tx_logtype pmemobj_tx_logtype();

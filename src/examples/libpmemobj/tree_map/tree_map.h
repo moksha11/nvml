@@ -39,6 +39,8 @@
 
 #include <libpmemobj.h>
 
+#define ENABLE_RESTART
+
 #define	TREE_MAP_TYPE_OFFSET 1000
 TOID_DECLARE(struct tree_map, TREE_MAP_TYPE_OFFSET + 0);
 

@@ -37,6 +37,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include "libpmemobj.h"
 #include "lane.h"
@@ -764,11 +765,14 @@ list_insert_new(PMEMobjpool *pop, struct list_head *oob_head,
 	uint64_t obj_doffset = obj_offset + OBJ_OOB_SIZE;
 
 #ifdef _DISABLE_LOGGING
-	if (oidp != NULL) {
-		oidp->off = obj_doffset;
-		oidp->pool_uuid_lo = pop->uuid_lo;
-		ret=0;
-		goto err_pmalloc;
+	if(tx_is_relaxedlog()) {
+		if (oidp != NULL) {
+			oidp->off = obj_doffset;
+			oidp->pool_uuid_lo = pop->uuid_lo;
+			ret=0;
+			//goto err_pmalloc;
+			goto err_redolog;
+		}
 	}
 #endif
 
@@ -822,7 +826,9 @@ list_insert_new(PMEMobjpool *pop, struct list_head *oob_head,
 		list_fill_entry_persist(pop, entry_ptr,
 				next_offset, prev_offset);
 	}
-
+#ifdef _DISABLE_LOGGING
+	err_redolog:
+#endif
 	if (oidp != NULL) {
 		if (OBJ_PTR_IS_VALID(pop, oidp))
 			redo_index = list_set_oid_redo_log(pop, redo,
@@ -974,6 +980,9 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 
 	int ret;
 	int out_ret;
+#ifdef _DISABLE_LOGGING
+	uint64_t *tempoff;
+#endif
 
 	struct lane_section *lane_section;
 
@@ -1014,6 +1023,8 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 #ifdef _DISABLE_LOGGING
 	if(tx_is_relaxedlog())
 		goto eap_goto_free;
+	//else
+		//printf("not a relaxed logging \n");
 #endif
 
 	struct list_entry *oob_entry_ptr =
@@ -1046,12 +1057,17 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 		redo_index = list_remove_single(pop, redo, redo_index, &args);
 	}
 
+#ifdef _DISABLE_LOGGING
+eap_goto_free:
+#endif
+
 	/* clear the oid */
 	if (OBJ_PTR_IS_VALID(pop, oidp))
 		redo_index = list_set_oid_redo_log(pop, redo, redo_index,
 				oidp, 0, 1);
 	else
 		oidp->off = 0;
+
 
 	redo_log_store_last(pop, redo, redo_index, sec_off_off, obj_offset);
 
@@ -1064,14 +1080,18 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 	 * Don't need to fill next and prev offsets of removing element
 	 * because the element is freed.
 	 */
-	//if ((errno = pfree(pop, &section->obj_offset))) {
 #ifdef _DISABLE_LOGGING
-	eap_goto_free:
-	if ((errno = pfree(pop, &obj_doffset))) {
-#else
-	if ((errno = pfree(pop, &obj_doffset))) {
-#endif
+//eap_goto_free:
 
+	if(tx_is_relaxedlog()) {
+		tempoff = &obj_doffset;
+	}else{
+		tempoff = &section->obj_offset;
+	}
+	if ((errno = pfree(pop, tempoff))) {
+#else
+	if ((errno = pfree(pop, &section->obj_offset))) {
+#endif
 		ERR("!pfree");
 		ret = -1;
 	} else {

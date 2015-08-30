@@ -147,25 +147,29 @@ redo_log_process(PMEMobjpool *pop, struct redo_log *redo,
 
 	uint64_t *val;
 	while ((redo->offset & REDO_FINISH_FLAG) == 0) {
-		val = (uint64_t *)((uintptr_t)pop->addr + redo->offset);
-		VALGRIND_ADD_TO_TX(val, sizeof (*val));
-		*val = redo->value;
-		VALGRIND_REMOVE_FROM_TX(val, sizeof (*val));
 
-		pop->flush(val, sizeof (uint64_t));
-
+		if(redo->offset < pop->heap_size)
+		{
+			val = (uint64_t *)((uintptr_t)pop->addr + redo->offset);
+			VALGRIND_ADD_TO_TX(val, sizeof (*val));
+			*val = redo->value;
+			VALGRIND_REMOVE_FROM_TX(val, sizeof (*val));
+			pop->flush(val, sizeof (uint64_t));
+		}
 		redo++;
 	}
 
 	uint64_t offset = redo->offset & REDO_FLAG_MASK;
-	val = (uint64_t *)((uintptr_t)pop->addr + offset);
-	VALGRIND_ADD_TO_TX(val, sizeof (*val));
-	*val = redo->value;
-	VALGRIND_REMOVE_FROM_TX(val, sizeof (*val));
 
-	pop->flush(val, sizeof (uint64_t));
-	pop->drain();
-
+	if(offset < pop->heap_size)
+	{
+		val = (uint64_t *)((uintptr_t)pop->addr + offset);
+		VALGRIND_ADD_TO_TX(val, sizeof (*val));
+		*val = redo->value;
+		VALGRIND_REMOVE_FROM_TX(val, sizeof (*val));
+		pop->flush(val, sizeof (uint64_t));
+		pop->drain();
+	}
 	redo->offset = 0;
 
 	pop->persist(&redo->offset, sizeof (redo->offset));
