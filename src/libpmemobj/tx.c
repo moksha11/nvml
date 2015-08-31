@@ -191,6 +191,9 @@ int set_nxtepoch_logmode() {
 
 	get_counter_diff(&curr_instr,&curr_llcstoremiss,&curr_llcloadmiss);
 
+	if(curr_instr <0 || curr_llcstoremiss < 0)
+		return 0;
+
 	if(first_epoch) {
 		set_epoch_budget(curr_instr,
 				curr_llcstoremiss,
