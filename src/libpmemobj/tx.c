@@ -156,8 +156,10 @@ int tx_is_relaxedlog(){
 
 long long get_hard_treshold(long long val){
 
-	val =  val + (val * (EAP_BUDGET_THRESHOLD/100));
-	return val;
+	double cntr = 0;
+	cntr = (double)val;
+	cntr =  cntr + (cntr * (EAP_BUDGET_THRESHOLD/100));
+	return (long long)cntr;
 }
 
 
