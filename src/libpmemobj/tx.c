@@ -160,6 +160,7 @@ long long get_hard_treshold(long long val){
 
 	cntr = (double)val;
 	cntr =  (cntr * (EAP_BUDGET_THRESHOLD/100));
+	printf("cntr %lf\n",cntr);
 	return (long long)cntr;
 }
 
