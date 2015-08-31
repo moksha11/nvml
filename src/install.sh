@@ -5,5 +5,5 @@ sudo cp /home/sudarsun/Dropbox/nvml/src/nondebug/*.* /usr/lib64/
 sudo cp /home/sudarsun/Dropbox/nvml/src/nondebug/*.* /usr/lib/
 
 
-cd pmc_driver/pmc/
-./install.sh
+#cd pmc_driver/pmc/
+#./install.sh

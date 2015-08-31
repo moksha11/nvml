@@ -191,7 +191,7 @@ int init_monitoring(){
 	//CTRL_SET_INT(eventId[0]);
 	//CTRL_SET_ENABLE(eventId[0]);
 	//eventId[3] = 0x5301cb;
-	pmc_init(eventId, 3);
+	pmc_init(eventId, 1);
 
 #ifndef NOEMULATE_LATENCY
 	/* Configure the timer to expire after 10 msec... */
@@ -300,12 +300,12 @@ int start_perf_monitoring(){
 	start0 = rdpmc(0);
 	start1 = rdpmc(1);
 	start2 = rdpmc(2);
-    /*printf("start_perf_monitoring Instructions: %llu\t "
+         printf("start_perf_monitoring Instructions: %llu\t "
                  "LLC Store Misses: %llu\t"
                  "LLC Load Misses: %llu \n",
                  start0,
                  start1,
-                 start2);*/
+                 start2);
 
 #endif
 	return 0;

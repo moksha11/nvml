@@ -41,6 +41,14 @@ RUNEXPERIMENT() {
 	done
 }
 
+ACIRD_THRESHOLDS(){
+sed -i '/#define EAP_BUDGET_THRESHOLD/c\#define EAP_BUDGET_THRESHOLD 10' /home/sudarsun/Dropbox/nvml/src/libpmemobj/tx.c 
+./install.sh
+}
+
+
+ACIRD_THRESHOLDS
+
 
 echo "**********BTREE**************"
 echo " "
@@ -50,6 +58,7 @@ APPBASE=$BASE/tree_map
 APP=$APPBASE/data_store_btree
 PARAM=$1
 RUNEXPERIMENT
+exit
 
 echo "**********HASHSET**************"
 echo " "
