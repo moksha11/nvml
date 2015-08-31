@@ -356,7 +356,7 @@ pfree(PMEMobjpool *pop, uint64_t *off)
 {
 
 #ifdef _EAP_ALLOC_OPTIMIZE
-//return 0;
+return 0;
 #endif
 	struct allocation_header *alloc = alloc_get_header(pop, *off);
 
