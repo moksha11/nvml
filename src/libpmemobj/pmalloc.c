@@ -354,6 +354,9 @@ pmalloc_usable_size(PMEMobjpool *pop, uint64_t off)
 int
 pfree(PMEMobjpool *pop, uint64_t *off)
 {
+#ifdef _EAP_ALLOC_OPTIMIZE
+//return 0;
+#endif
 
 	struct allocation_header *alloc = alloc_get_header(pop, *off);
 
@@ -388,11 +391,6 @@ pfree(PMEMobjpool *pop, uint64_t *off)
 		ERR("Failed to release the lane");
 		ASSERT(0);
 	}
-#ifdef _EAP_ALLOC_OPTIMIZE
-return 0;
-#endif
-
-
 	/*
 	 * There's no point in rolling back redo log changes because the
 	 * volatile errors don't break the persistent state.

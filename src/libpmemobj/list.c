@@ -1075,6 +1075,9 @@ eap_goto_free:
 
 	redo_log_process(pop, redo, REDO_NUM_ENTRIES);
 
+#ifdef _EAP_ALLOC_OPTIMIZE
+	goto relax_free;
+#endif
 
 	/*
 	 * Don't need to fill next and prev offsets of removing element
@@ -1098,6 +1101,9 @@ eap_goto_free:
 		ret = 0;
 	}
 
+#ifdef _EAP_ALLOC_OPTIMIZE
+relax_free:
+#endif
 	if (head) {
 		out_ret = pmemobj_mutex_unlock(pop, &head->lock);
 		ASSERTeq(out_ret, 0);

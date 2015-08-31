@@ -146,11 +146,11 @@ int tx_is_relaxedlog(){
 
 	if(tx.logtype == TX_LOG_NODATA) {
 		nr_relaxed_logs++;
-		return 1;
+		return 0;
 	}
 	else{
 		nr_completed_logs++;
-		return 1;
+		return 0;
 	}
 }
 
