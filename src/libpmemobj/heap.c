@@ -486,8 +486,8 @@ heap_recycle_block(PMEMobjpool *pop, struct bucket *b, struct memory_block *m,
 {
 
 #ifdef _EAP_ALLOC_OPTIMIZE
-//	m->size_idx = units;
-//	return;
+	m->size_idx = units;
+	return;
 #endif
 
 	//printf("bucket_insert_block heap_recycle_block");
@@ -529,11 +529,7 @@ heap_get_bestfit_block(PMEMobjpool *pop, struct bucket *b,
 	}
 
 	if (units != m->size_idx)
-#ifndef _EAP_ALLOC_OPTIMIZE
 		heap_recycle_block(pop, b, m, units);
-#else
-		heap_recycle_block(pop, b, m, units);
-#endif
 
 	bucket_unlock(b);
 
