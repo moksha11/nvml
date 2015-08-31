@@ -64,6 +64,9 @@
 #define	MAX_PLAYER_TIMER 1000
 #define	MAX_BULLET_TIMER 500
 
+uint64_t playercnt;
+uint64_t bulletcnt;
+
 enum colors {
 	C_UNKNOWN,
 	C_PLAYER,
@@ -134,7 +137,7 @@ create_player(PMEMobjpool *pop, void *ptr, void *arg)
 	struct player *p = ptr;
 	p->x = GAME_WIDTH / 2;
 	p->timer = 1;
-
+	fprintf(stderr,"playercnt %lu\n",playercnt);
 	pmemobj_persist(pop, p, sizeof (*p));
 }
 
@@ -150,7 +153,7 @@ create_bullet(PMEMobjpool *pop, void *ptr, void *arg)
 	b->x = p->x;
 	b->y = PLAYER_Y - 1;
 	b->timer = 1;
-
+	fprintf(stderr,"bulletcnt %lu\n",bulletcnt);
 	pmemobj_persist(pop, b, sizeof (*b));
 }
 
@@ -396,6 +399,7 @@ main(int argc, char *argv[])
 	pmemobj_close(pop);
 
 	endwin();
+	fprintf(stderr,"bulletcnt %lu\n",bulletcnt);
 
 	return 0;
 }
