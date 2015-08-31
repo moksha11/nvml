@@ -36,7 +36,7 @@ int initalized;
 #define CTRL_SET_UM(val, m) (val |= (m << 8))
 #define CTRL_SET_EVENT(val, e) (val |= e)
 
-//static pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
 
 typedef unsigned long long hrtime_t;
 
@@ -149,6 +149,7 @@ int init_monitoring(){
 #ifndef NOEMULATE_LATENCY
 	struct itimerval timer;
 #endif
+
 	/* Initializing the rdpmc library */
 	int eventId[4] = {0, 0, 0, 0};
 
@@ -191,8 +192,13 @@ int init_monitoring(){
 	//CTRL_SET_INT(eventId[0]);
 	//CTRL_SET_ENABLE(eventId[0]);
 	//eventId[3] = 0x5301cb;
-	pmc_init(eventId, 3);
 
+	pmc_init(eventId, 3);
+	/* start reading rdpmc counter */
+	start0 = rdpmc(0);
+	start1 = rdpmc(1);
+	start2 = rdpmc(2);
+	//start3 = rdpmc(0x3);
 #ifndef NOEMULATE_LATENCY
 	/* Configure the timer to expire after 10 msec... */
 	timer.it_value.tv_sec = 0;
@@ -300,12 +306,12 @@ int start_perf_monitoring(){
 	start0 = rdpmc(0);
 	start1 = rdpmc(1);
 	start2 = rdpmc(2);
-    /*printf("start_perf_monitoring Instructions: %llu\t "
+         printf("start_perf_monitoring Instructions: %llu\t "
                  "LLC Store Misses: %llu\t"
                  "LLC Load Misses: %llu \n",
                  start0,
                  start1,
-                 start2);*/
+                 start2);
 
 #endif
 	return 0;

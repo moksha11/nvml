@@ -2,7 +2,8 @@
 #set -x
 
 INPUTFILE=/tmp/ramdisk/test
-BASE=/home/sudarsun/Dropbox/nvml/src/examples/libpmemobj
+LIBBASE=/home/sudarsun/devel/Docs/nvml/src
+BASE=/home/sudarsun/devel/Docs/nvml/src/examples/libpmemobj
 APPBASE=$BASE/btree
 APP=$APPBASE/btree
 OPS=10000
@@ -36,10 +37,19 @@ RUNEXPERIMENT() {
 		cd $APPBASE
 		#/home/sudarsun/Dropbox/nvml/src/killer.sh &
 		$APP_PREFIX "taskset --cpu-list 4,5,6,7 $APP $INPUTFILE"
+		#taskset --cpu-list 4,5,6,7 $APP $INPUTFILE
 		#gprof "$APP $INPUTFILE"
 		#gprof $APP
 	done
 }
+
+ACIRD_THRESHOLDS(){
+sed -i '/#define EAP_BUDGET_THRESHOLD/c\#define EAP_BUDGET_THRESHOLD 100' $LIBBASE/libpmemobj/tx.c 
+./install.sh &>del.txt
+}
+
+
+ACIRD_THRESHOLDS
 
 
 echo "**********BTREE**************"
