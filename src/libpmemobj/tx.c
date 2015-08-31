@@ -113,6 +113,8 @@ int tx_set_log_mode() {
 #define MONITORINGFREQ 100000
 #define RELAX_LOGGING 1
 #define EAP_UNDO_MAX 1024
+/*Threshold in terms of percentage*/
+#define EAP_BUDGET_THRESHOLD 0
 
 long long instr_budget =2003141586;
 long long llcstoremiss_budget =4004458;
@@ -152,15 +154,24 @@ int tx_is_relaxedlog(){
 	}
 }
 
+long long get_hard_treshold(long long val){
+
+	val =  val + (val * (EAP_BUDGET_THRESHOLD/100));
+	return val;
+}
+
+
 void set_epoch_budget(long long instr,
 					  long long storemiss,
 					  long long loadmiss){
 
-	instr_budget = instr;
-	llcstoremiss_budget = storemiss;
-	llcloadmiss_budget = loadmiss;
-	printf("Budget set to %lld %lld %lld \n",
-			instr_budget,llcstoremiss_budget,llcloadmiss_budget);
+	instr_budget = instr + get_hard_treshold(instr);
+	llcstoremiss_budget = storemiss + get_hard_treshold(storemiss);
+	llcloadmiss_budget = loadmiss + get_hard_treshold(loadmiss);
+
+	printf("Budget set to %lld %lld %lld from base %lld %lld %lld\n",
+			instr_budget,llcstoremiss_budget,llcloadmiss_budget,
+			instr,storemiss,loadmiss);
 }
 
 
@@ -194,8 +205,8 @@ int set_nxtepoch_logmode() {
 	if((instr_budget < curr_instr) ||
 			(llcstoremiss_budget < curr_llcstoremiss)){
 		nxt_epoch_log_mode = TX_LOG_NODATA;
-		printf("Relaxing %lld %lld %lld \n",
-				curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+		//printf("Relaxing %lld %lld %lld \n",
+			//	curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 	}else {
 		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",
 		//curr_instr,curr_llcstoremiss,curr_llcloadmiss);
