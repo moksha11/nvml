@@ -355,9 +355,6 @@ int
 pfree(PMEMobjpool *pop, uint64_t *off)
 {
 
-#ifdef _EAP_ALLOC_OPTIMIZE
-return 0;
-#endif
 	struct allocation_header *alloc = alloc_get_header(pop, *off);
 
 	struct bucket *b = heap_get_best_bucket(pop, alloc->size);
@@ -391,6 +388,10 @@ return 0;
 		ERR("Failed to release the lane");
 		ASSERT(0);
 	}
+#ifdef _EAP_ALLOC_OPTIMIZE
+return 0;
+#endif
+
 
 	/*
 	 * There's no point in rolling back redo log changes because the
