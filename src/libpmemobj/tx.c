@@ -1304,6 +1304,11 @@ pmemobj_tx_commit()
 	ASSERT(tx.section != NULL);
 	ASSERT(tx.stage == TX_STAGE_WORK);
 
+#ifdef EAP_FLUSH_ONLY
+	tx.stage = TX_STAGE_ONCOMMIT;
+	return 0;
+#endif
+
 	struct lane_tx_runtime *lane =
 			(struct lane_tx_runtime *)tx.section->runtime;
 	struct tx_data *txd = SLIST_FIRST(&lane->tx_entries);
