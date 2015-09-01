@@ -57,7 +57,7 @@ echo " "
 APPBASE=$BASE/tree_map
 APP=$APPBASE/data_store_btree
 PARAM=$1
-RUNEXPERIMENT
+#RUNEXPERIMENT
 
 echo "**********HASHSET**************"
 echo " "
@@ -66,7 +66,7 @@ echo " "
 APPBASE=$BASE/hashset
 APP=$APPBASE/hashset_tx
 PARAM=$1
-RUNEXPERIMENT
+#RUNEXPERIMENT
 
 echo "**********BINARY TREE**************"
 echo " "
@@ -75,7 +75,7 @@ echo " "
 APPBASE=$BASE/btree_eap
 APP=$APPBASE/btree
 PARAM=$1
-RUNEXPERIMENT
+#RUNEXPERIMENT
 
 echo "**********SNAPPY*************"
 echo " "

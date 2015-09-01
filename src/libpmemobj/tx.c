@@ -110,7 +110,7 @@ int tx_set_log_mode() {
 #endif
 
 #ifdef _DISABLE_LOGGING
-#define MONITORINGFREQ 50000
+#define MONITORINGFREQ 10000
 #define RELAX_LOGGING 1
 #define EAP_UNDO_MAX 1024
 /*Threshold in terms of percentage*/
