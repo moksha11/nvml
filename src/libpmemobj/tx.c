@@ -166,8 +166,8 @@ long long get_hard_treshold(long long val){
 
 
 void set_epoch_budget(long long instr,
-					  long long storemiss,
-					  long long loadmiss){
+		long long storemiss,
+		long long loadmiss){
 
 	instr_budget = instr + get_hard_treshold(instr);
 	llcstoremiss_budget = storemiss + get_hard_treshold(storemiss);
@@ -213,7 +213,7 @@ int set_nxtepoch_logmode() {
 			(llcstoremiss_budget < curr_llcstoremiss)){
 		nxt_epoch_log_mode = TX_LOG_NODATA;
 		//printf("Relaxing %lld %lld %lld \n",
-			//	curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+		//	curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 	}else {
 		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",
 		//curr_instr,curr_llcstoremiss,curr_llcloadmiss);
@@ -505,9 +505,18 @@ tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 		VALGRIND_SET_CLEAN(oobh, size);
 #endif
 
+#ifdef _EAP_ALLOC_OPTIMIZE
+		//if(oobh){
+		//oobh->inactive_oob = 1;
+		//printf("tx_clear_undo_log Calling list_remove_free_eap\n");
+		ret = list_remove_free_eap(pop, head,
+				0, NULL, &obj, 1);
+		//}
+#else
 		/* remove and free all elements from undo log */
 		ret = list_remove_free(pop, head,
 				0, NULL, &obj);
+#endif
 
 		ASSERTeq(ret, 0);
 		if (ret) {
@@ -1696,7 +1705,9 @@ pmemobj_tx_free(PMEMoid oid)
 	struct oob_header *oobh = OOB_HEADER_FROM_OID(lane->pop, oid);
 	ASSERT(oobh->user_type < PMEMOBJ_NUM_OID_TYPES);
 
+
 	if (oobh->internal_type == TYPE_ALLOCATED) {
+
 		/* the object is in object store */
 		struct object_store_item *obj_list =
 				&lane->pop->store->bytype[oobh->user_type];
@@ -1713,6 +1724,14 @@ pmemobj_tx_free(PMEMoid oid)
 #endif
 		VALGRIND_REMOVE_FROM_TX(oobh, pmalloc_usable_size(lane->pop,
 				oid.off - OBJ_OOB_SIZE));
+#ifdef _EAP_ALLOC_OPTIMIZE
+		if(oobh){
+			oobh->inactive_oob = 1;
+			printf("pmemobj_tx_free: Calling list_remove_free_eap\n");
+			return list_remove_free_eap(lane->pop, &layout->undo_alloc,
+					0, NULL, &oid, oobh->inactive_oob);
+		}
+#endif
 		/*
 		 * The object has been allocated within the same transaction
 		 * so we can just remove and free the object from undo log.

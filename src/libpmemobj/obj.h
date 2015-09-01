@@ -150,7 +150,13 @@ struct oob_header {
 	size_t size;		/* used only in root object */
 	uint16_t internal_type;
 	uint16_t user_type;
+#ifndef _EAP_ALLOC_OPTIMIZE
 	uint8_t padding[4];
+#else
+	/*used for delayed garbage collection*/
+	uint8_t inactive_oob;	
+	uint8_t padding[3];
+#endif
 };
 
 enum internal_type {

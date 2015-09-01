@@ -961,19 +961,20 @@ err:
 	return ret;
 }
 
-/*
- * list_remove_free -- remove from two lists and free an object
- *
- * pop         - pmemobj pool handle
- * oob_head    - oob list head
- * pe_offset   - offset to list entry on user list relative to user data
- * head        - user list head
- * oidp        - pointer to target object ID
- */
+
+#ifdef _EAP_ALLOC_OPTIMIZE
+/* list_remove_free_eap -- remove from two lists and free an object
+*
+* pop         - pmemobj pool handle
+* oob_head    - oob list head
+* pe_offset   - offset to list entry on user list relative to user data
+* head        - user list head
+* oidp        - pointer to target object ID
+*/
 int
-list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
+list_remove_free_eap(PMEMobjpool *pop, struct list_head *oob_head,
 	size_t pe_offset, struct list_head *head,
-	PMEMoid *oidp)
+	PMEMoid *oidp, uint8_t inactiveobj)
 {
 	LOG(3, NULL);
 	ASSERTne(oob_head, NULL);
@@ -982,6 +983,9 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 	int out_ret;
 #ifdef _DISABLE_LOGGING
 	uint64_t *tempoff;
+	//uint8_t inactive = oidp->inactive_oid;
+	//if(inactiveobj)
+		//printf("OOID inactive flag set \n");
 #endif
 
 	struct lane_section *lane_section;
@@ -1076,7 +1080,8 @@ eap_goto_free:
 	redo_log_process(pop, redo, REDO_NUM_ENTRIES);
 
 #ifdef _EAP_ALLOC_OPTIMIZE
-	goto relax_free;
+	if(inactiveobj)
+		goto relax_free;
 #endif
 
 	/*
@@ -1102,8 +1107,176 @@ eap_goto_free:
 	}
 
 #ifdef _EAP_ALLOC_OPTIMIZE
+	goto relax_free;
 relax_free:
+	if ((errno = pfree_eap(pop, &section->obj_offset))) {
+		ERR("!pfree");
+		ret = -1;
+	} else {
+	ret = 0;
+	}
 #endif
+
+	if (head) {
+		out_ret = pmemobj_mutex_unlock(pop, &head->lock);
+		ASSERTeq(out_ret, 0);
+		if (out_ret)
+			LOG(2, "pmemobj_mutex_unlock failed");
+	}
+err_lock:
+	out_ret = pmemobj_mutex_unlock(pop, &oob_head->lock);
+	ASSERTeq(out_ret, 0);
+	if (out_ret)
+		LOG(2, "pmemobj_mutex_unlock failed");
+err_oob_lock:
+	out_ret = lane_release(pop);
+	ASSERTeq(out_ret, 0);
+	if (out_ret)
+		LOG(2, "lane_release failed");
+
+	return ret;
+}
+
+#endif
+
+
+/*
+ * list_remove_free -- remove from two lists and free an object
+ *
+ * pop         - pmemobj pool handle
+ * oob_head    - oob list head
+ * pe_offset   - offset to list entry on user list relative to user data
+ * head        - user list head
+ * oidp        - pointer to target object ID
+ */
+int
+list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
+	size_t pe_offset, struct list_head *head,
+	PMEMoid *oidp)
+{
+	LOG(3, NULL);
+	ASSERTne(oob_head, NULL);
+
+	int ret;
+	int out_ret;
+#ifdef _DISABLE_LOGGING
+	uint64_t *tempoff;
+	//uint8_t inactive = oidp->inactive_oid;
+	//if(inactive)
+		//	printf("OOID inactive flag set \n");
+#endif
+
+	struct lane_section *lane_section;
+
+	if ((ret = lane_hold(pop, &lane_section, LANE_SECTION_LIST))) {
+		LOG(2, "lane_hold failed");
+		return ret;
+	}
+
+	ASSERTne(lane_section, NULL);
+	ASSERTne(lane_section->layout, NULL);
+
+	/*
+	 * In case of oob list and user list grab the oob list lock
+	 * first.
+	 *
+	 * XXX performance improvement: initialize oob locks at pool opening
+	 */
+	if ((ret = pmemobj_mutex_lock(pop, &oob_head->lock))) {
+		LOG(2, "pmemobj_mutex_lock failed");
+		goto err_oob_lock;
+	}
+
+	if (head) {
+		if ((ret = pmemobj_mutex_lock(pop, &head->lock))) {
+			LOG(2, "pmemobj_mutex_lock failed");
+			goto err_lock;
+		}
+	}
+	struct lane_list_section *section =
+		(struct lane_list_section *)lane_section->layout;
+	uint64_t sec_off_off = OBJ_PTR_TO_OFF(pop, &section->obj_offset);
+	struct redo_log *redo = section->redo;
+	size_t redo_index = 0;
+
+	uint64_t obj_doffset = oidp->off;
+	uint64_t obj_offset = obj_doffset - OBJ_OOB_SIZE;
+
+#ifdef _DISABLE_LOGGING
+	if(tx_is_relaxedlog())
+		goto eap_goto_free;
+	//else
+		//printf("not a relaxed logging \n");
+#endif
+
+	struct list_entry *oob_entry_ptr =
+		(struct list_entry *)OBJ_OFF_TO_PTR(pop,
+				obj_offset + OOB_ENTRY_OFF);
+
+	struct list_args_remove oob_args = {
+		.pe_offset = OOB_ENTRY_OFF_REV,
+		.head = oob_head,
+		.entry_ptr = oob_entry_ptr,
+		.obj_doffset = obj_doffset
+	};
+
+	/* remove from oob list */
+	redo_index = list_remove_single(pop, redo, redo_index, &oob_args);
+
+	if (head) {
+		struct list_entry *entry_ptr =
+			(struct list_entry *)OBJ_OFF_TO_PTR(pop,
+					obj_doffset + pe_offset);
+
+		struct list_args_remove args = {
+			.pe_offset = pe_offset,
+			.head = head,
+			.entry_ptr = entry_ptr,
+			.obj_doffset = obj_doffset
+		};
+
+		/* remove from user list */
+		redo_index = list_remove_single(pop, redo, redo_index, &args);
+	}
+
+#ifdef _DISABLE_LOGGING
+eap_goto_free:
+#endif
+
+	/* clear the oid */
+	if (OBJ_PTR_IS_VALID(pop, oidp))
+		redo_index = list_set_oid_redo_log(pop, redo, redo_index,
+				oidp, 0, 1);
+	else
+		oidp->off = 0;
+
+
+	redo_log_store_last(pop, redo, redo_index, sec_off_off, obj_offset);
+
+	ASSERT(redo_index <= REDO_NUM_ENTRIES);
+
+	redo_log_process(pop, redo, REDO_NUM_ENTRIES);
+
+	/*
+	 * Don't need to fill next and prev offsets of removing element
+	 * because the element is freed.
+	 */
+#ifdef _DISABLE_LOGGING
+	if(tx_is_relaxedlog()) {
+		tempoff = &obj_doffset;
+	}else{
+		tempoff = &section->obj_offset;
+	}
+	if ((errno = pfree(pop, tempoff))) {
+#else
+	if ((errno = pfree(pop, &section->obj_offset))) {
+#endif
+		ERR("!pfree");
+		ret = -1;
+	} else {
+		ret = 0;
+	}
+
 	if (head) {
 		out_ret = pmemobj_mutex_unlock(pop, &head->lock);
 		ASSERTeq(out_ret, 0);

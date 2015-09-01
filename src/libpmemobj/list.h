@@ -85,6 +85,13 @@ int list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 	size_t pe_offset, struct list_head *head,
 	PMEMoid *oidp);
 
+#ifdef _EAP_ALLOC_OPTIMIZE
+int
+list_remove_free_eap(PMEMobjpool *pop, struct list_head *oob_head,
+	size_t pe_offset, struct list_head *head,
+	PMEMoid *oidp, uint8_t inactiveobj);
+#endif
+
 int list_remove(PMEMobjpool *pop,
 	size_t pe_offset, struct list_head *head,
 	PMEMoid oid);

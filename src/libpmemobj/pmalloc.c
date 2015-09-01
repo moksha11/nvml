@@ -351,12 +351,92 @@ pmalloc_usable_size(PMEMobjpool *pop, uint64_t off)
  *
  * If successful function returns zero. Otherwise an error number is returned.
  */
+
+#ifdef _EAP_ALLOC_OPTIMIZE
+int
+pfree_eap(PMEMobjpool *pop, uint64_t *off)
+{
+	struct allocation_header *alloc = alloc_get_header(pop, *off);
+
+	struct bucket *b = heap_get_best_bucket(pop, alloc->size);
+
+	int err = 0;
+
+	struct memory_block m = get_mblock_from_alloc(pop, b, alloc);
+
+	if ((err = heap_lock_if_run(pop, m)) != 0)
+		return err;
+
+
+	uint64_t op_result;
+	void *hdr;
+	struct memory_block res = heap_free_block(pop, b, m, &hdr, &op_result);
+	if(res.block_off){
+
+	}
+
+#if 1
+	struct lane_section *lane;
+	if ((err = lane_hold(pop, &lane, LANE_SECTION_ALLOCATOR)) != 0)
+		goto error_lane_hold;
+
+
+	struct allocator_lane_section *sec =
+		(struct allocator_lane_section *)lane->layout;
+
+
+	redo_log_store(pop, sec->redo, ALLOC_OP_REDO_PTR_OFFSET,
+		pop_offset(pop, off), 0);
+	redo_log_store_last(pop, sec->redo, ALLOC_OP_REDO_HEADER,
+		pop_offset(pop, hdr), op_result);
+
+	redo_log_process(pop, sec->redo, MAX_ALLOC_OP_REDO);
+
+	if (lane_release(pop) != 0) {
+		ERR("Failed to release the lane");
+		ASSERT(0);
+	}
+
+	/*
+	 * There's no point in rolling back redo log changes because the
+	 * volatile errors don't break the persistent state.
+	 */
+	if (bucket_insert_block(b, res)
+		!= 0) {
+		ERR("Failed to update the heap volatile state");
+		ASSERT(0);
+	}
+#endif
+
+
+	if (heap_unlock_if_run(pop, m) != 0) {
+		ERR("Failed to release run lock");
+		ASSERT(0);
+	}
+
+#if 1
+	if (bucket_is_small(b) && heap_degrade_run_if_empty(pop, b, res) != 0) {
+		ERR("Failed to degrade run");
+		ASSERT(0);
+	}
+#endif
+
+	return 0;
+
+#if 1
+error_lane_hold:
+#endif
+	if (heap_unlock_if_run(pop, m) != 0) {
+		ERR("Failed to release run lock");
+		ASSERT(0);
+	}
+
+	return err;
+}
+#else
 int
 pfree(PMEMobjpool *pop, uint64_t *off)
 {
-#ifdef _EAP_ALLOC_OPTIMIZE
-//return 0;
-#endif
 
 	struct allocation_header *alloc = alloc_get_header(pop, *off);
 
@@ -372,6 +452,7 @@ pfree(PMEMobjpool *pop, uint64_t *off)
 	uint64_t op_result;
 	void *hdr;
 	struct memory_block res = heap_free_block(pop, b, m, &hdr, &op_result);
+
 
 	struct lane_section *lane;
 	if ((err = lane_hold(pop, &lane, LANE_SECTION_ALLOCATOR)) != 0)
@@ -421,6 +502,7 @@ error_lane_hold:
 
 	return err;
 }
+#endif
 
 /*
  * lane_allocator_construct -- create allocator lane section

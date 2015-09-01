@@ -172,6 +172,9 @@ int pmemobj_cond_wait(PMEMobjpool *pop, PMEMcond *condp,
 typedef struct pmemoid {
 	uint64_t pool_uuid_lo;
 	uint64_t off;
+#ifdef 	_EAP_ALLOC_OPTIMIZE
+	//uint8_t inactive_oid;
+#endif
 } PMEMoid;
 
 #define	OID_NULL	((PMEMoid) {0, 0})
