@@ -1304,7 +1304,7 @@ pmemobj_tx_commit()
 	ASSERT(tx.section != NULL);
 	ASSERT(tx.stage == TX_STAGE_WORK);
 
-#ifdef EAP_FLUSH_ONLY
+#ifdef _EAP_FLUSH_ONLY
 	tx.stage = TX_STAGE_ONCOMMIT;
 	return 0;
 #endif
