@@ -1173,6 +1173,11 @@ pmemobj_tx_begin(PMEMobjpool *pop, jmp_buf env, ...)
 
 	int err = 0;
 
+#ifdef _EAP_FLUSH_ONLY
+	tx.stage = TX_STAGE_WORK;
+	return 0;
+#endif
+
 #ifdef _DISABLE_LOGGING
 	//print_stats();
 	reset_log_mode();
