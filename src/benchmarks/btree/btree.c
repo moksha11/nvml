@@ -45,7 +45,7 @@ POBJ_LAYOUT_ROOT(btree, struct btree);
 POBJ_LAYOUT_TOID(btree, struct btree_node);
 POBJ_LAYOUT_END(btree);
 
-#define ITEM_COUNT 20000
+#define ITEM_COUNT 100000
 #define	KEYLEN 64
 #define	VALUELEN 64
 

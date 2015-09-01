@@ -114,7 +114,7 @@ int tx_set_log_mode() {
 #define RELAX_LOGGING 1
 #define EAP_UNDO_MAX 1024
 /*Threshold in terms of percentage*/
-#define EAP_BUDGET_THRESHOLD 100
+#define EAP_BUDGET_THRESHOLD 50
 
 long long instr_budget =2003141586;
 long long llcstoremiss_budget =4004458;
@@ -146,7 +146,7 @@ int tx_is_relaxedlog(){
 
 	if(tx.logtype == TX_LOG_NODATA) {
 		nr_relaxed_logs++;
-		return 0;
+		return 1;
 	}
 	else{
 		nr_completed_logs++;

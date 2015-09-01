@@ -433,7 +433,8 @@ error_lane_hold:
 
 	return err;
 }
-#else
+#endif
+
 int
 pfree(PMEMobjpool *pop, uint64_t *off)
 {
@@ -502,7 +503,6 @@ error_lane_hold:
 
 	return err;
 }
-#endif
 
 /*
  * lane_allocator_construct -- create allocator lane section

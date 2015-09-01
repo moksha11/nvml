@@ -2,8 +2,8 @@
 #set -x
 
 INPUTFILE=/tmp/ramdisk/test
-LIBBASE=/home/stewart/Dropbox/nvml/src
-BASE=/home/stewart/Dropbox/nvml/src/examples/libpmemobj
+LIBBASE=/home/sudarsun/devel/Docs/nvml/src
+BASE=$LIBBASE/examples/libpmemobj
 APPBASE=$BASE/btree
 APP=$APPBASE/btree
 OPS=10000
@@ -44,7 +44,7 @@ RUNEXPERIMENT() {
 }
 
 ACIRD_THRESHOLDS(){
-sed -i '/#define EAP_BUDGET_THRESHOLD/c\#define EAP_BUDGET_THRESHOLD 100' $LIBBASE/libpmemobj/tx.c 
+sed -i '/#define EAP_BUDGET_THRESHOLD/c\#define EAP_BUDGET_THRESHOLD 50' $LIBBASE/libpmemobj/tx.c 
 ./install.sh &>del.txt
 }
 
@@ -58,7 +58,6 @@ APPBASE=$BASE/tree_map
 APP=$APPBASE/data_store_btree
 PARAM=$1
 RUNEXPERIMENT
-exit`
 
 echo "**********HASHSET**************"
 echo " "
