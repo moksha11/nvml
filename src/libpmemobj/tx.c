@@ -1842,6 +1842,7 @@ pmemobj_tx_free(PMEMoid oid)
 	}
 }
 
+
 /*
  * lane_transaction_construct -- create transaction lane section
  */
