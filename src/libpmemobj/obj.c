@@ -552,7 +552,7 @@ pmemobj_close(PMEMobjpool *pop)
 	}
 
 	pmemobj_cleanup(pop);
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	print_stats();
 #endif
 }
@@ -1080,10 +1080,10 @@ pmemobj_memset_persist(PMEMobjpool *pop, void *dest, int c, size_t len)
 void
 pmemobj_persist(PMEMobjpool *pop, void *addr, size_t len)
 {
-#ifdef _DISABLE_LOGGING
-#else
+//#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+//#else
 	pop->persist(addr, len);
-#endif
+//#endif
 }
 
 /*

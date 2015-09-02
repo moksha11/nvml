@@ -58,6 +58,7 @@ APPBASE=$BASE/tree_map
 APP=$APPBASE/data_store_btree
 PARAM=$1
 RUNEXPERIMENT
+exit
 
 echo "**********HASHSET**************"
 echo " "
