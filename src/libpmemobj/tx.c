@@ -145,6 +145,10 @@ int currtype;
 /*check if transaction is a relaxed log*/
 int tx_is_relaxedlog(){
 
+#if defined(_EAP_METADATA_ONLY)
+	return 1;
+#endif
+
 #if defined(_EAP_FLUSH_ONLY)
 	return 1;
 #endif
