@@ -772,26 +772,17 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 
 #if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	struct list_head tmphead;
-
 	tmphead = layout->undo_alloc;
 #if 0
-
 	if(tx_is_relaxedlog())
 	{
-		//tmphead = layout->eap_undo_alloc;
-		//fprintf(stderr,"tx_pre_commit_alloc eap_undo_alloc");
-	//}else {
-		tmphead = layout->undo_alloc;
+		tmphead = layout->eap_undo_alloc;
 		fprintf(stderr,"tx_pre_commit_alloc undo_alloc");
 	}
+#endif
 	for (iter = tmphead.pe_first; !OBJ_OID_IS_NULL(iter);
 			iter = oob_list_next(pop,
 					&tmphead, iter)) {
-#endif
-		for (iter = tmphead.pe_first; !OBJ_OID_IS_NULL(iter);
-				iter = oob_list_next(pop,
-						&tmphead, iter)) {
-
 #else
 	for (iter = layout->undo_alloc.pe_first; !OBJ_OID_IS_NULL(iter);
 			iter = oob_list_next(pop,
