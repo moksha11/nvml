@@ -115,7 +115,9 @@ tree_map_insert_item_at(TOID(struct tree_map_node) node, int pos,
 static void
 tree_map_insert_empty(TOID(struct tree_map) map, struct tree_map_node_item item)
 {
+#ifndef _FLUSHONLY
 	TX_ADD_FIELD(map, root);
+#endif
 	D_RW(map)->root = TX_ZNEW(struct tree_map_node);
 
 	tree_map_insert_item_at(D_RO(map)->root, 0, item);
@@ -129,7 +131,9 @@ tree_map_insert_node(TOID(struct tree_map_node) node, int p,
 	struct tree_map_node_item item,
 	TOID(struct tree_map_node) left, TOID(struct tree_map_node) right)
 {
+#ifndef _FLUSHONLY
 	TX_ADD(node);
+#endif
 	if (D_RO(node)->items[p].key != 0) { /* move all existing data */
 		memmove(&D_RW(node)->items[p + 1], &D_RW(node)->items[p],
 		sizeof (struct tree_map_node_item) * ((BTREE_ORDER - 2 - p)));
@@ -194,8 +198,9 @@ tree_map_find_dest_node(TOID(struct tree_map) map, TOID(struct tree_map_node) n,
 			D_RW(up)->items[0] = m;
 			D_RW(up)->slots[0] = n;
 			D_RW(up)->slots[1] = right;
-
+#ifndef _FLUSHONLY
 			TX_ADD_FIELD(map, root);
+#endif
 			D_RW(map)->root = up;
 			n = up;
 		}
@@ -221,7 +226,9 @@ static void
 tree_map_insert_item(TOID(struct tree_map_node) node, int p,
 	struct tree_map_node_item item)
 {
+#ifndef _FLUSHONLY
 	TX_ADD(node);
+#endif
 	if (D_RO(node)->items[p].key != 0) {
 		memmove(&D_RW(node)->items[p + 1], &D_RW(node)->items[p],
 		sizeof (struct tree_map_node_item) * ((BTREE_ORDER - 2 - p)));
@@ -237,7 +244,10 @@ tree_map_insert(PMEMobjpool *pop,
 	TOID(struct tree_map) map, uint64_t key, PMEMoid value)
 {
 	struct tree_map_node_item item = {key, value};
-	TX_BEGIN(pop) {
+#ifndef _FLUSHONLY
+	TX_BEGIN(pop)
+	{
+#endif
 		if (tree_map_is_empty(map)) {
 			tree_map_insert_empty(map, item);
 		} else {
@@ -250,8 +260,9 @@ tree_map_insert(PMEMobjpool *pop,
 
 			tree_map_insert_item(dest, p, item);
 		}
+#ifndef _FLUSHONLY
 	} TX_END
-
+#endif
 	return 0;
 }
 

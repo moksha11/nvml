@@ -40,7 +40,7 @@ LIBDIR ?= ../../../debug
 
 INCS = -I$(INCDIR)
 LIBS = -Wl,-rpath=$(LIBDIR) -L$(LIBDIR) -lpmemobj -pthread -lrdpmc
-CFLAGS = -std=gnu99 -Wall -Werror -g #-pg
+CFLAGS = -std=gnu99 -Wall -Werror -g  -D_FLUSHONLY#-pg
 CSTYLE = ../../../../utils/cstyle
 
 all:     TARGET = all

@@ -64,7 +64,7 @@ struct tx_data {
 static __thread struct {
 	enum pobj_tx_stage stage;
 	struct lane_section *section;
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	enum pobj_tx_logtype logtype;
 #endif
 } tx;
@@ -103,16 +103,17 @@ struct tx_add_range_args {
 };
 
 
-#ifndef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+#else
 int tx_set_log_mode() {
 	return 0;
 }
 #endif
 
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 #define MONITORINGFREQ 10000
 #define RELAX_LOGGING 1
-#define EAP_UNDO_MAX 1024
+#define EAP_UNDO_MAX 4096
 /*Threshold in terms of percentage*/
 #define EAP_BUDGET_THRESHOLD 50
 
@@ -143,6 +144,10 @@ int currtype;
 
 /*check if transaction is a relaxed log*/
 int tx_is_relaxedlog(){
+
+#if defined(_EAP_FLUSH_ONLY)
+	return 1;
+#endif
 
 	if(tx.logtype == TX_LOG_NODATA) {
 		nr_relaxed_logs++;
@@ -191,6 +196,10 @@ int tx_set_log_mode() {
  */
 int set_nxtepoch_logmode() {
 
+#if defined(_EAP_FLUSH_ONLY)
+	return 0;
+#endif
+
 	long long curr_instr, curr_llcstoremiss, curr_llcloadmiss;
 
 	get_counter_diff(&curr_instr,&curr_llcstoremiss,&curr_llcloadmiss);
@@ -230,6 +239,8 @@ void reset_log_mode() {
 }
 
 void tx_start_monitoring(){
+
+
 	if(!nr_txcount) {
 		start_perf_monitoring();
 		tx_set_log_mode();
@@ -238,6 +249,10 @@ void tx_start_monitoring(){
 }
 
 void tx_stop_monitoring(){
+
+#if defined(_EAP_FLUSH_ONLY)
+	return;
+#endif
 
 	nr_txcount_start++;
 
@@ -264,12 +279,26 @@ void print_stats(){
 int
 pmemobj_tx_add_eap_undolog(PMEMobjpool *pop, PMEMoid oid, uint64_t hoff, size_t size) {
 
-	int index= nr_relaxed_logs %EAP_UNDO_MAX;
+	int index= nr_eap_undo_count %EAP_UNDO_MAX;
 	eap_undo[index].pop = pop;
 	eap_undo[index].eap_undo_oid = oid;
 	eap_undo[index].hoff = hoff;
 	eap_undo[index].size = size;
 	nr_eap_undo_count++;
+	return 0;
+}
+
+/*
+ * pmemobj_tx_add_eap_undolog -- adds persistent memory range into the eap's UNDO
+ * transaction log
+ */
+int
+pmemobj_tx_reset_eap_undolog(PMEMobjpool *pop, int index) {
+
+	eap_undo[index].pop = 0;
+	//eap_undo[index].eap_undo_oid = 0;
+	eap_undo[index].hoff = 0;
+	eap_undo[index].size = 0;
 	return 0;
 }
 
@@ -281,18 +310,22 @@ pmemobj_tx_add_eap_undolog(PMEMobjpool *pop, PMEMoid oid, uint64_t hoff, size_t 
 int
 pmemobj_tx_persist_eap_undolog(PMEMobjpool *pop) {
 
-	int i=0;
+	int index=0;
 	//struct tx_add_range_args *args1 = &args;
 	void *ptr=NULL;
 
-	for ( i=0; i < nr_eap_undo_count; i++){
+	for ( index=0; index < nr_eap_undo_count; index++){
 
-		if(eap_undo[i].pop == pop) {
-			ptr = OBJ_OFF_TO_PTR(eap_undo[i].pop, eap_undo[i].hoff);
-			if(ptr)
-				pmem_msync(ptr, eap_undo[i].size);
+		if(eap_undo[index].pop == pop) {
+			ptr = OBJ_OFF_TO_PTR(eap_undo[index].pop, eap_undo[index].hoff);
+			if(ptr) {
+				pmem_msync(ptr, eap_undo[index].size);
+				pmemobj_tx_reset_eap_undolog(pop, index);
+				//fprintf(stdout,"persisted %d\n", index);
+			}
 		}
 	}
+	nr_eap_undo_count = 0;
 	return 0;
 }
 #endif
@@ -487,7 +520,7 @@ tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 {
 	LOG(3, NULL);
 
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog()){ 	
 		return 0;
 	}
@@ -729,7 +762,7 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
 
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog()){
 		return;
 	}
@@ -771,7 +804,7 @@ static void
 tx_pre_commit_set(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog()){
 		return;
 	}
@@ -1173,12 +1206,7 @@ pmemobj_tx_begin(PMEMobjpool *pop, jmp_buf env, ...)
 
 	int err = 0;
 
-#ifdef _EAP_FLUSH_ONLY
-	tx.stage = TX_STAGE_WORK;
-	return 0;
-#endif
-
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	//print_stats();
 	reset_log_mode();
 	//tx_set_log_mode();
@@ -1253,7 +1281,7 @@ pmemobj_tx_stage()
 }
 
 
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 /*
  * pmemobj_tx_stage -- returns current transaction stage
  */
@@ -1309,13 +1337,18 @@ pmemobj_tx_commit()
 	ASSERT(tx.section != NULL);
 	ASSERT(tx.stage == TX_STAGE_WORK);
 
+
+	struct lane_tx_runtime *lane =
+			(struct lane_tx_runtime *)tx.section->runtime;
+
 #ifdef _EAP_FLUSH_ONLY
+	pmemobj_tx_persist_eap_undolog(lane->pop);
 	tx.stage = TX_STAGE_ONCOMMIT;
 	return 0;
 #endif
 
-	struct lane_tx_runtime *lane =
-			(struct lane_tx_runtime *)tx.section->runtime;
+
+
 	struct tx_data *txd = SLIST_FIRST(&lane->tx_entries);
 
 	if (SLIST_NEXT(txd, tx_entry) == NULL) {
@@ -1354,7 +1387,7 @@ pmemobj_tx_commit()
 void
 pmemobj_tx_end()
 {
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	//print_stats();
 	//reset_log_mode();
 	//tx_set_log_mode();
@@ -1461,7 +1494,7 @@ pmemobj_tx_add_common(struct tx_add_range_args *args)
 		struct tx_range *range =
 				OBJ_OFF_TO_PTR(args->pop, iter.off);
 
-		if (args->offset >= range->offset &&
+		if (args->offset >= range->offset	 &&
 				args->offset + args->size <=
 				range->offset + range->size) {
 			LOG(4, "Notice: range: offset = 0x%jx"
@@ -1514,9 +1547,10 @@ pmemobj_tx_add_range_direct(void *ptr, size_t size)
 	struct lane_tx_runtime *lane =
 			(struct lane_tx_runtime *)tx.section->runtime;
 
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog()){
-		//pmemobj_tx_add_eap_undolog(lane->pop, OID_NULL, ptr - (void *)lane->pop, size);
+		if(lane)
+			pmemobj_tx_add_eap_undolog(lane->pop, OID_NULL, ptr - (void *)lane->pop, size);
 		return 0;
 	}
 #endif
@@ -1555,6 +1589,13 @@ pmemobj_tx_add_range(PMEMoid oid, uint64_t hoff, size_t size)
 	}
 	ASSERT(OBJ_OID_IS_VALID(lane->pop, oid));
 
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+	if(tx_is_relaxedlog()){
+		pmemobj_tx_add_eap_undolog(lane->pop, oid, oid.off + hoff, size);
+		return 0;
+	}
+#endif
+
 	struct oob_header *oobh = OOB_HEADER_FROM_OID(lane->pop, oid);
 
 	struct tx_add_range_args args = {
@@ -1562,14 +1603,6 @@ pmemobj_tx_add_range(PMEMoid oid, uint64_t hoff, size_t size)
 			.offset = oid.off + hoff,
 			.size = size
 	};
-
-#ifdef _DISABLE_LOGGING
-	if(tx_is_relaxedlog()){
-		//pmemobj_tx_add_eap_undolog(lane->pop, oid, oid.off + hoff, size);
-		return 0;
-	}
-#endif
-
 
 	/*
 	 * If internal type is not equal to TYPE_ALLOCATED it means

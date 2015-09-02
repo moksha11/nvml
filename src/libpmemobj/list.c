@@ -764,7 +764,8 @@ list_insert_new(PMEMobjpool *pop, struct list_head *oob_head,
 	uint64_t obj_offset = section->obj_offset;
 	uint64_t obj_doffset = obj_offset + OBJ_OOB_SIZE;
 
-#ifdef _DISABLE_LOGGING
+//#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog()) {
 		if (oidp != NULL) {
 			oidp->off = obj_doffset;
@@ -826,9 +827,9 @@ list_insert_new(PMEMobjpool *pop, struct list_head *oob_head,
 		list_fill_entry_persist(pop, entry_ptr,
 				next_offset, prev_offset);
 	}
-#ifdef _DISABLE_LOGGING
-	err_redolog:
-#endif
+
+err_redolog:
+
 	if (oidp != NULL) {
 		if (OBJ_PTR_IS_VALID(pop, oidp))
 			redo_index = list_set_oid_redo_log(pop, redo,
@@ -981,7 +982,7 @@ list_remove_free_eap(PMEMobjpool *pop, struct list_head *oob_head,
 
 	int ret;
 	int out_ret;
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	uint64_t *tempoff;
 	//uint8_t inactive = oidp->inactive_oid;
 	//if(inactiveobj)
@@ -1024,7 +1025,8 @@ list_remove_free_eap(PMEMobjpool *pop, struct list_head *oob_head,
 	uint64_t obj_doffset = oidp->off;
 	uint64_t obj_offset = obj_doffset - OBJ_OOB_SIZE;
 
-#ifdef _DISABLE_LOGGING
+//#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog())
 		goto eap_goto_free;
 	//else
@@ -1061,7 +1063,8 @@ list_remove_free_eap(PMEMobjpool *pop, struct list_head *oob_head,
 		redo_index = list_remove_single(pop, redo, redo_index, &args);
 	}
 
-#ifdef _DISABLE_LOGGING
+//#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 eap_goto_free:
 #endif
 
@@ -1088,7 +1091,8 @@ eap_goto_free:
 	 * Don't need to fill next and prev offsets of removing element
 	 * because the element is freed.
 	 */
-#ifdef _DISABLE_LOGGING
+//#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 //eap_goto_free:
 
 	if(tx_is_relaxedlog()) {
@@ -1159,7 +1163,9 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 
 	int ret;
 	int out_ret;
-#ifdef _DISABLE_LOGGING
+//#ifdef _DISABLE_LOGGING
+
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	uint64_t *tempoff;
 	//uint8_t inactive = oidp->inactive_oid;
 	//if(inactive)
@@ -1202,7 +1208,7 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 	uint64_t obj_doffset = oidp->off;
 	uint64_t obj_offset = obj_doffset - OBJ_OOB_SIZE;
 
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog())
 		goto eap_goto_free;
 	//else
@@ -1239,7 +1245,7 @@ list_remove_free(PMEMobjpool *pop, struct list_head *oob_head,
 		redo_index = list_remove_single(pop, redo, redo_index, &args);
 	}
 
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 eap_goto_free:
 #endif
 
@@ -1261,7 +1267,7 @@ eap_goto_free:
 	 * Don't need to fill next and prev offsets of removing element
 	 * because the element is freed.
 	 */
-#ifdef _DISABLE_LOGGING
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog()) {
 		tempoff = &obj_doffset;
 	}else{
