@@ -829,10 +829,7 @@ list_insert_new(PMEMobjpool *pop, struct list_head *oob_head,
 				next_offset, prev_offset);
 	}
 
-	/*for avoiding compilation errors*/
-	goto err_redolog;
 err_redolog:
-
 
 	if (oidp != NULL) {
 		if (OBJ_PTR_IS_VALID(pop, oidp))
