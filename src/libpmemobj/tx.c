@@ -145,11 +145,7 @@ int currtype;
 /*check if transaction is a relaxed log*/
 int tx_is_relaxedlog(){
 
-#if defined(_EAP_METADATA_ONLY)
-	return 1;
-#endif
-
-#if defined(_EAP_FLUSH_ONLY)
+#if defined(_EAP_METADATA_ONLY) || defined(_EAP_FLUSH_ONLY)
 	return 1;
 #endif
 
@@ -200,7 +196,7 @@ int tx_set_log_mode() {
  */
 int set_nxtepoch_logmode() {
 
-#if defined(_EAP_FLUSH_ONLY)
+#if defined(_EAP_METADATA_ONLY) || defined(_EAP_FLUSH_ONLY)
 	return 0;
 #endif
 
@@ -244,6 +240,9 @@ void reset_log_mode() {
 
 void tx_start_monitoring(){
 
+#if defined(_EAP_METADATA_ONLY) || defined(_EAP_FLUSH_ONLY)
+	return;
+#endif
 
 	if(!nr_txcount) {
 		start_perf_monitoring();
@@ -254,7 +253,7 @@ void tx_start_monitoring(){
 
 void tx_stop_monitoring(){
 
-#if defined(_EAP_FLUSH_ONLY)
+#if defined(_EAP_METADATA_ONLY) || defined(_EAP_FLUSH_ONLY)
 	return;
 #endif
 
