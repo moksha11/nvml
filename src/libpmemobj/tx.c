@@ -775,9 +775,9 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 	struct list_head tmphead;
 
 	if(tx_is_relaxedlog()){
-		tmphead = layout->eap_undo_alloc;
-		fprintf(stderr,"tx_pre_commit_alloc eap_undo_alloc");
-	}else {
+		//tmphead = layout->eap_undo_alloc;
+		//fprintf(stderr,"tx_pre_commit_alloc eap_undo_alloc");
+	//}else {
 		tmphead = layout->undo_alloc;
 		fprintf(stderr,"tx_pre_commit_alloc undo_alloc");
 	}
