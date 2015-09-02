@@ -523,11 +523,14 @@ tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 {
 	LOG(3, NULL);
 
-#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+/*if flush only mode, we dont care about any logging*/
+//#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+#if defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog()){ 	
 		return 0;
 	}
 #endif
+
 	int ret;
 	PMEMoid obj;
 	while (!OBJ_LIST_EMPTY(head)) {
@@ -882,6 +885,11 @@ tx_post_commit_set(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
 
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+	if(tx_is_relaxedlog()){
+			return 0;
+	}
+#endif
 	return tx_clear_undo_log(pop, &layout->undo_set);
 }
 
