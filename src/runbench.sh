@@ -2,7 +2,7 @@
 #set -x
 
 INPUTFILE=/tmp/ramdisk/test
-LIBBASE=/home/sudarsun/devel/Docs/nvml/src
+LIBBASE=~/Dropbox/nvml/src
 BASE=$LIBBASE/examples/libpmemobj
 APPBASE=$BASE/btree
 APP=$APPBASE/btree
