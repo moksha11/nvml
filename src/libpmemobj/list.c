@@ -765,7 +765,8 @@ list_insert_new(PMEMobjpool *pop, struct list_head *oob_head,
 	uint64_t obj_doffset = obj_offset + OBJ_OOB_SIZE;
 
 //#ifdef _DISABLE_LOGGING
-#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+//#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+#if defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog()) {
 		if (oidp != NULL) {
 			oidp->off = obj_doffset;

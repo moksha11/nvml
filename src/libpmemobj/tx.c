@@ -1045,8 +1045,6 @@ static PMEMoid
 tx_alloc_common(size_t size, unsigned int type_num,
 		void (*constructor)(PMEMobjpool *pop, void *ptr, void *arg))
 {
-#ifdef _DISABLE_METALOG
-#else
 	LOG(3, NULL);
 
 	if (tx.stage != TX_STAGE_WORK) {
@@ -1084,7 +1082,6 @@ tx_alloc_common(size_t size, unsigned int type_num,
 		errno = ENOMEM;
 		pmemobj_tx_abort(ENOMEM);
 	}
-#endif
 	return retoid;
 }
 
