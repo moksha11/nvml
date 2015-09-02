@@ -1073,9 +1073,19 @@ tx_alloc_common(size_t size, unsigned int type_num,
 
 	/* allocate object to undo log */
 	PMEMoid retoid = OID_NULL;
+
+
+#if defined(_DISABLE_LOGGING)
+	if(tx_is_relaxedlog()) {
+		list_insert_new(lane->pop, &layout->eap_undo_alloc,
+				0, NULL, OID_NULL, 0,
+				size, constructor, &args, &retoid);
+	}
+#else
 	list_insert_new(lane->pop, &layout->undo_alloc,
 			0, NULL, OID_NULL, 0,
 			size, constructor, &args, &retoid);
+#endif
 
 	if (OBJ_OID_IS_NULL(retoid)) {
 		ERR("out of memory");

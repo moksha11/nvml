@@ -195,7 +195,7 @@ struct lane_tx_layout {
 	struct list_head undo_free;
 	struct list_head undo_set;
 
-#ifdef _ENABLE_EAP
+#ifdef _DISABLE_LOGGING
 	struct list_head redo_set;
 	struct list_head eap_undo_alloc;
 	struct list_head eap_undo_free;
