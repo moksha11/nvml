@@ -770,7 +770,7 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 
 	PMEMoid iter;
 
-#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+#if 0//defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 
 	struct list_head tmphead;
 
