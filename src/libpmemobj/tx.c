@@ -1124,7 +1124,7 @@ tx_alloc_common(size_t size, unsigned int type_num,
 	PMEMoid retoid = OID_NULL;
 
 
-#if defined(_DISABLE_LOGGING)
+#if 0 //defined(_DISABLE_LOGGING)
 	if(tx_is_relaxedlog()) {
 		list_insert_new(lane->pop, &layout->eap_undo_alloc,
 				0, NULL, OID_NULL, 0,
