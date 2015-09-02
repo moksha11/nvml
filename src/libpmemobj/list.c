@@ -829,6 +829,7 @@ list_insert_new(PMEMobjpool *pop, struct list_head *oob_head,
 				next_offset, prev_offset);
 	}
 
+	goto err_redolog;
 err_redolog:
 
 	if (oidp != NULL) {
