@@ -847,10 +847,40 @@ tx_post_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 {
 	LOG(3, NULL);
 
-#ifdef _DISABLE_METALOG
-#else
 	PMEMoid obj;
 	int ret;
+
+
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+
+	struct list_head tmphead;
+
+	if(tx_is_relaxedlog()){
+		tmphead = layout->eap_undo_alloc;
+	}else {
+		tmphead = layout->undo_alloc;
+	}
+
+	while (!OBJ_LIST_EMPTY(&tmphead)) {
+		obj = tmphead.pe_first;
+
+		struct oob_header *oobh = OOB_HEADER_FROM_OID(pop, obj);
+		ASSERT(oobh->user_type < PMEMOBJ_NUM_OID_TYPES);
+
+		struct object_store_item *obj_list =
+				&pop->store->bytype[oobh->user_type];
+
+		/* move object to object store */
+		ret = list_move_oob(pop,
+				&tmphead, &obj_list->head, obj);
+
+		ASSERTeq(ret, 0);
+		if (ret) {
+			LOG(2, "list_move_oob failed");
+			return ret;
+		}
+	}
+#else
 	while (!OBJ_LIST_EMPTY(&layout->undo_alloc)) {
 		obj = layout->undo_alloc.pe_first;
 
