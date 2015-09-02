@@ -770,16 +770,17 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 
 	PMEMoid iter;
 
-#if 0//defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+
 	struct list_head tmphead;
-	tmphead = layout->undo_alloc;
-#if 1
-	if(tx_is_relaxedlog())
-	{
+
+	if(tx_is_relaxedlog()){
 		tmphead = layout->eap_undo_alloc;
+		fprintf(stderr,"tx_pre_commit_alloc eap_undo_alloc");
+	}else {
+		tmphead = layout->undo_alloc;
 		fprintf(stderr,"tx_pre_commit_alloc undo_alloc");
 	}
-#endif
 	for (iter = tmphead.pe_first; !OBJ_OID_IS_NULL(iter);
 			iter = oob_list_next(pop,
 					&tmphead, iter)) {
@@ -852,7 +853,8 @@ tx_post_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 	int ret;
 
 
-#if 0//defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+
 	struct list_head tmphead;
 
 	if(tx_is_relaxedlog()){
@@ -1123,7 +1125,7 @@ tx_alloc_common(size_t size, unsigned int type_num,
 	PMEMoid retoid = OID_NULL;
 
 
-#if 0 //list_remove_free_eapdefined(_DISABLE_LOGGING)
+#if defined(_DISABLE_LOGGING)
 	if(tx_is_relaxedlog()) {
 		list_insert_new(lane->pop, &layout->eap_undo_alloc,
 				0, NULL, OID_NULL, 0,
@@ -1841,7 +1843,6 @@ pmemobj_tx_free(PMEMoid oid)
 				0, NULL, &oid);
 	}
 }
-
 
 /*
  * lane_transaction_construct -- create transaction lane section
