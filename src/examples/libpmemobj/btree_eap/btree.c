@@ -46,9 +46,9 @@ POBJ_LAYOUT_TOID(btree, struct btree_node);
 POBJ_LAYOUT_END(btree);
 
 #define	POOLSIZE 1024*1024*1024
-#define ITEM_COUNT 50000
+#define ITEM_COUNT 100000
 #define	KEYLEN 64
-#define	VALUELEN 8
+#define	VALUELEN 64
 
 unsigned int nr_inserts;
 unsigned int nr_find_failure;
@@ -88,6 +88,27 @@ btree_node_construct(PMEMobjpool *pop, void *ptr, void *arg)
 }
 
 /*
+ * btree_node_construct -- constructor of btree node
+ */
+TOID(struct btree_node)
+btree_node_construct1(PMEMobjpool *pop, void *arg)
+{
+
+	struct btree_node_arg *a = arg;
+
+	TOID(struct btree_node) node = TX_NEW(struct btree_node);
+
+	D_RW(node)->key = a->key;
+	strcpy(D_RW(node)->value, a->value);
+	D_RW(node)->slots[0] = TOID_NULL(struct btree_node);
+	D_RW(node)->slots[1] = TOID_NULL(struct btree_node);
+	return node;
+
+}
+
+
+
+/*
  * btree_insert -- inserts new element into the tree
  */
 void
@@ -95,9 +116,15 @@ btree_insert(PMEMobjpool *pop, int64_t key, const char *value)
 {
 	TOID(struct btree) btree = POBJ_ROOT(pop, struct btree);
 	TOID(struct btree_node) *dst = &D_RW(btree)->root;
+	TOID(struct btree_node) node;
+	int i=0;
 
 	while (!TOID_IS_NULL(*dst)) {
-		dst = &D_RW(*dst)->slots[key > D_RO(*dst)->key];
+
+		if(key > D_RO(*dst)->key) i = 1;
+				else i=0;
+
+		dst = &D_RW(*dst)->slots[i];
 	}
 
 	struct btree_node_arg args = {
@@ -106,8 +133,11 @@ btree_insert(PMEMobjpool *pop, int64_t key, const char *value)
 			.value = value
 	};
 
-	POBJ_ALLOC(pop, dst, struct btree_node, args.size,
-			btree_node_construct, &args);
+	//POBJ_ALLOC(pop, dst, struct btree_node, args.size,
+		//	btree_node_construct, &args);
+		node = btree_node_construct1(pop, &args);
+		*dst = node;
+
 }
 
 /*
@@ -118,13 +148,19 @@ btree_find(PMEMobjpool *pop, int64_t key)
 {
 	TOID(struct btree) btree = POBJ_ROOT(pop, struct btree);
 	TOID(struct btree_node) node = D_RO(btree)->root;
+	int i=0;
 
 	while (!TOID_IS_NULL(node)) {
 		if (D_RO(node)->key == key){
 			return D_RO(node)->value;
 		}
-		else
-			node = D_RO(node)->slots[key > D_RO(node)->key];
+		else {
+
+			if(key > D_RO(node)->key) i = 1;
+			else i=0;
+
+			node = D_RO(node)->slots[i];
+		}
 	}
 
 	return NULL;
@@ -192,8 +228,10 @@ void operation(PMEMobjpool *pop, uint64_t key_64,
 	case 'i':
 		//gen_random(value, VALUELEN);
 		if(value){
+			TX_BEGIN(pop) {
 			btree_insert(pop, key_64, (const char *)value);
 			nr_inserts++;
+			}TX_END
 		}
 		break;
 	case 'f':
@@ -211,8 +249,7 @@ void operation(PMEMobjpool *pop, uint64_t key_64,
 
 }
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	char value[VALUELEN];
 	uint64_t key_64;
@@ -253,7 +290,7 @@ main(int argc, char *argv[])
 	for (i = 0; i < ITEM_COUNT; i++)
 	{
 		key_64 = i;
-		//operation(pop,key_64, value,'f');
+		operation(pop,key_64, value,'f');
 		//fprintf(stdout,"key %lu value %s \n", key_64, value);
 
 	}
