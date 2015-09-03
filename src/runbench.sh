@@ -2,7 +2,7 @@
 #set -x
 
 INPUTFILE=/tmp/ramdisk/test
-LIBBASE=~/Dropbox/nvml/src
+LIBBASE=/home/sudarsun/devel/Docs/nvml/src
 BASE=$LIBBASE/examples/libpmemobj
 APPBASE=$BASE/btree
 APP=$APPBASE/btree
@@ -57,8 +57,8 @@ echo " "
 APPBASE=$BASE/tree_map
 APP=$APPBASE/data_store_btree
 PARAM=$1
-RUNEXPERIMENT
-exit
+#RUNEXPERIMENT
+#exit
 
 echo "**********HASHSET**************"
 echo " "
@@ -68,6 +68,7 @@ APPBASE=$BASE/hashset
 APP=$APPBASE/hashset_tx
 PARAM=$1
 RUNEXPERIMENT
+exit
 
 echo "**********BINARY TREE**************"
 echo " "

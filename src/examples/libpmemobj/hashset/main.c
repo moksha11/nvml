@@ -149,7 +149,7 @@ unknown_command(const char *str)
 }
 
 
-#define	INPUT_BUF_LEN 1000
+#define	INPUT_BUF_LEN 4096
 
 void gen_insert_val(char *key, int val, char op) {
 
