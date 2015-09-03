@@ -48,9 +48,9 @@
 
 #define	MAX_HASH_FUNCS 2
 
-#define	INITIAL_SIZE 8
-#define	MAX_INSERTS 8
-#define	MAX_GROWS 32
+#define	INITIAL_SIZE 10*1024*1024
+#define	MAX_INSERTS 10*1024*1024
+#define	MAX_GROWS 10*1024*1024
 
 struct cuckoo_slot {
 	uint64_t key;

@@ -46,7 +46,7 @@ POBJ_LAYOUT_TOID(btree, struct btree_node);
 POBJ_LAYOUT_END(btree);
 
 #define	POOLSIZE 1024*1024*1024
-#define ITEM_COUNT 100000
+#define ITEM_COUNT 50000
 #define	KEYLEN 64
 #define	VALUELEN 64
 
@@ -57,7 +57,9 @@ unsigned int nr_find_success;
 struct btree_node {
 	int64_t key;
 	TOID(struct btree_node) slots[2];
+	struct btree_node *directp;
 	char value[];
+
 };
 
 struct btree {
@@ -98,10 +100,13 @@ btree_node_construct1(PMEMobjpool *pop, void *arg)
 
 	TOID(struct btree_node) node = TX_NEW(struct btree_node);
 
-	D_RW(node)->key = a->key;
-	strcpy(D_RW(node)->value, a->value);
-	D_RW(node)->slots[0] = TOID_NULL(struct btree_node);
-	D_RW(node)->slots[1] = TOID_NULL(struct btree_node);
+	struct btree_node *node1= D_RW(node);
+
+	node1->directp = node1;
+	node1->key = a->key;
+	strcpy(node1->value, a->value);
+	node1->slots[0] = TOID_NULL(struct btree_node);
+	node1->slots[1] = TOID_NULL(struct btree_node);
 	return node;
 
 }
@@ -276,6 +281,8 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
+
+
 	int i=0;
 	/*****************************************************************************/
 	/* Insertion */
@@ -290,7 +297,7 @@ int main(int argc, char *argv[])
 	for (i = 0; i < ITEM_COUNT; i++)
 	{
 		key_64 = i;
-		operation(pop,key_64, value,'f');
+		//operation(pop,key_64, value,'f');
 		//fprintf(stdout,"key %lu value %s \n", key_64, value);
 
 	}
