@@ -368,6 +368,13 @@ pfree_eap(PMEMobjpool *pop, uint64_t *off)
 		return err;
 
 
+#ifdef _EAP_ALLOC_OPTIMIZE
+
+		fprintf(stderr,"_EAP_ALLOC_OPTIMIZE\n");
+		return 0;
+#endif
+
+
 	uint64_t op_result;
 	void *hdr;
 	struct memory_block res = heap_free_block(pop, b, m, &hdr, &op_result);
