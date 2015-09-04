@@ -1084,7 +1084,7 @@ eap_goto_free:
 
 	redo_log_process(pop, redo, REDO_NUM_ENTRIES);
 
-#ifdef _EAP_ALLOC_OPTIMIZE
+#if 0//def _EAP_ALLOC_OPTIMIZE
 	if(inactiveobj)
 		goto relax_free;
 #endif
@@ -1112,7 +1112,7 @@ eap_goto_free:
 		ret = 0;
 	}
 
-#ifdef _EAP_ALLOC_OPTIMIZE
+#if 0 //def _EAP_ALLOC_OPTIMIZE
 	goto relax_free;
 relax_free:
 	if ((errno = pfree_eap(pop, &section->obj_offset))) {
