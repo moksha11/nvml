@@ -369,9 +369,8 @@ pfree_eap(PMEMobjpool *pop, uint64_t *off)
 
 
 #ifdef _EAP_ALLOC_OPTIMIZE
-
-		fprintf(stderr,"_EAP_ALLOC_OPTIMIZE\n");
-		return 0;
+		//fprintf(stderr,"_EAP_ALLOC_OPTIMIZE\n");
+		//return 0;
 #endif
 
 
