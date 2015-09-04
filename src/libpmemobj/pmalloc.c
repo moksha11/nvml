@@ -458,7 +458,7 @@ pfree(PMEMobjpool *pop, uint64_t *off)
 
 #ifdef _EAP_ALLOC_OPTIMIZE
 		//fprintf(stderr,"_EAP_ALLOC_OPTIMIZE\n");
-		goto release_free_lock;
+		goto error_lane_hold;
 #endif
 
 	uint64_t op_result;
@@ -493,9 +493,6 @@ pfree(PMEMobjpool *pop, uint64_t *off)
 		ERR("Failed to update the heap volatile state");
 		ASSERT(0);
 	}
-#ifdef _EAP_ALLOC_OPTIMIZE
-release_free_lock:
-#endif
 
 	if (heap_unlock_if_run(pop, m) != 0) {
 		ERR("Failed to release run lock");
