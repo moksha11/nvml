@@ -450,6 +450,10 @@ pfree(PMEMobjpool *pop, uint64_t *off)
 	if ((err = heap_lock_if_run(pop, m)) != 0)
 		return err;
 
+#ifdef _EAP_ALLOC_OPTIMIZE
+		return 0;
+#endif
+
 	uint64_t op_result;
 	void *hdr;
 	struct memory_block res = heap_free_block(pop, b, m, &hdr, &op_result);

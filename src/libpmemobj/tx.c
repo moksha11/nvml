@@ -1797,9 +1797,6 @@ pmemobj_tx_free(PMEMoid oid)
 	if (OBJ_OID_IS_NULL(oid))
 		return 0;
 
-#ifdef _EAP_ALLOC_OPTIMIZE
-		return 0;
-#endif
 
 	struct lane_tx_runtime *lane =
 			(struct lane_tx_runtime *)tx.section->runtime;
