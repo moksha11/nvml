@@ -115,7 +115,7 @@ int tx_set_log_mode() {
 #define RELAX_LOGGING 1
 #define EAP_UNDO_MAX 4096
 /*Threshold in terms of percentage*/
-#define EAP_BUDGET_THRESHOLD 50
+#define EAP_BUDGET_THRESHOLD 100
 
 long long instr_budget =2003141586;
 long long llcstoremiss_budget =4004458;
@@ -146,6 +146,7 @@ int currtype;
 int tx_is_relaxedlog(){
 
 #if defined(_EAP_METADATA_ONLY) || defined(_EAP_FLUSH_ONLY)
+	fprintf(stdout,"relaxed log \n");
 	return 1;
 #endif
 
@@ -214,29 +215,24 @@ int set_nxtepoch_logmode() {
 		/*Full transaction by default*/
 		nxt_epoch_log_mode = TX_LOG_UNDO_FULL;
 		first_epoch =0;
+		return 0;
 	}
 
-
 	/*We are worried only about CPU instructions and NVM stores*/
-	if((instr_budget < curr_instr) ||
-			(llcstoremiss_budget < curr_llcstoremiss)){
+	if((instr_budget < curr_instr)) { //||
+		//(llcstoremiss_budget < curr_llcstoremiss)){
 		nxt_epoch_log_mode = TX_LOG_NODATA;
-		//printf("Relaxing %lld %lld %lld \n",
-		//	curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+		printf("Relaxing %lld %lld %lld \n",
+			curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 	}else {
-		//printf("TX_SET_LOG_MODE %lld %lld %lld \n",
-		//curr_instr,curr_llcstoremiss,curr_llcloadmiss);
+		printf("Strict ACID %lld %lld %lld \n",
+		curr_instr,curr_llcstoremiss,curr_llcloadmiss);
 		relaxdatalog = 0;
 		nxt_epoch_log_mode = TX_LOG_UNDO_FULL;
 	}
 	return 0;
 }
 
-
-void reset_log_mode() {
-	relaxdatalog = 0;
-	//tx.logtype = TX_LOG_UNDO_FULL;
-}
 
 void tx_start_monitoring(){
 
@@ -248,6 +244,10 @@ void tx_start_monitoring(){
 		start_perf_monitoring();
 		tx_set_log_mode();
 		nr_txcount = 1;
+
+		if(first_epoch) {
+			nxt_epoch_log_mode = TX_LOG_UNDO_FULL;
+		}
 	}
 }
 
@@ -525,7 +525,6 @@ tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 
 /*if flush only mode, we dont care about any logging*/
 #if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
-//#if defined(_EAP_FLUSH_ONLY)
 	if(tx_is_relaxedlog()){ 	
 		return 0;
 	}
@@ -545,12 +544,8 @@ tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 #endif
 
 #ifdef _EAP_ALLOC_OPTIMIZE
-		//if(oobh){
-		//oobh->inactive_oob = 1;
-		//printf("tx_clear_undo_log Calling list_remove_free_eap\n");
 		ret = list_remove_free_eap(pop, head,
 				0, NULL, &obj, 1);
-		//}
 #else
 		/* remove and free all elements from undo log */
 		ret = list_remove_free(pop, head,
@@ -774,7 +769,8 @@ tx_pre_commit_alloc(PMEMobjpool *pop, struct lane_tx_layout *layout)
 
 	struct list_head tmphead;
 
-	tmphead = layout->eap_undo_alloc;
+	//tmphead = layout->eap_undo_alloc;
+	tmphead = layout->undo_alloc;
 
 	if(tx_is_relaxedlog()){
 		tmphead = layout->eap_undo_alloc;
@@ -1274,7 +1270,6 @@ pmemobj_tx_begin(PMEMobjpool *pop, jmp_buf env, ...)
 
 #if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	//print_stats();
-	reset_log_mode();
 	//tx_set_log_mode();
 	//printf("pmemobj_tx_begin \n");
 	tx_start_monitoring();
@@ -1455,7 +1450,6 @@ pmemobj_tx_end()
 {
 #if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 	//print_stats();
-	//reset_log_mode();
 	//tx_set_log_mode();
 	tx_stop_monitoring();
 #endif

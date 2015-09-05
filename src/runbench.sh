@@ -44,7 +44,7 @@ RUNEXPERIMENT() {
 }
 
 ACIRD_THRESHOLDS(){
-sed -i '/#define EAP_BUDGET_THRESHOLD/c\#define EAP_BUDGET_THRESHOLD 50' $LIBBASE/libpmemobj/tx.c 
+#sed -i '/#define EAP_BUDGET_THRESHOLD/c\#define EAP_BUDGET_THRESHOLD 100' $LIBBASE/libpmemobj/tx.c 
 ./install.sh &>del.txt
 }
 
@@ -67,8 +67,8 @@ echo " "
 APPBASE=$BASE/hashset
 APP=$APPBASE/hashset_tx
 PARAM=$1
-RUNEXPERIMENT
-exit
+#RUNEXPERIMENT
+#exit
 
 echo "**********BINARY TREE**************"
 echo " "
@@ -78,6 +78,7 @@ APPBASE=$BASE/btree_eap
 APP=$APPBASE/btree
 PARAM=$1
 RUNEXPERIMENT
+exit
 
 echo "**********SNAPPY*************"
 echo " "
@@ -87,7 +88,3 @@ APPBASE=$BASE/snappy
 APP=$APPBASE/run_snappy.sh
 cd $APPBASE
 $APP 0
-
-
-
-

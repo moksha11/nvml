@@ -46,7 +46,7 @@ POBJ_LAYOUT_TOID(btree, struct btree_node);
 POBJ_LAYOUT_END(btree);
 
 #define	POOLSIZE 1024*1024*1024
-#define ITEM_COUNT 50000
+#define ITEM_COUNT 500000
 #define	KEYLEN 64
 #define	VALUELEN 64
 
@@ -289,14 +289,14 @@ int main(int argc, char *argv[])
 	for (i = 0; i < ITEM_COUNT; i++)
 	{
 		bzero(value, VALUELEN);
-		key_64 = i;
+		key_64 = rand()%ITEM_COUNT;
 		operation(pop,key_64, value,'i');
 	}
 	/*****************************************************************************/
 	/* Find/Search */
 	for (i = 0; i < ITEM_COUNT; i++)
 	{
-		key_64 = i;
+		key_64 = rand()%ITEM_COUNT;
 		//operation(pop,key_64, value,'f');
 		//fprintf(stdout,"key %lu value %s \n", key_64, value);
 

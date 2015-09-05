@@ -306,12 +306,12 @@ int start_perf_monitoring(){
 	start0 = rdpmc(0);
 	start1 = rdpmc(1);
 	start2 = rdpmc(2);
-         printf("start_perf_monitoring Instructions: %llu\t "
+         /*printf("start_perf_monitoring Instructions: %llu\t "
                  "LLC Store Misses: %llu\t"
                  "LLC Load Misses: %llu \n",
                  start0,
                  start1,
-                 start2);
+                 start2);*/
 
 #endif
 	return 0;
@@ -328,17 +328,13 @@ void get_counter_diff(long long *instrcntr,
 	*nvmloads = diffstop2;
 
 #if 0
-	*instrcntr =  stop0-start0;
-	*nvmstores = stop1-start1;
-	*nvmloads = stop2-start2;
-#endif
-
 	 printf("get_counter_diff instructions: %lld\t "
               "llc store misses: %lld\t"
               "llc load misses: %lld \n",
               *instrcntr,
               *nvmstores,
               *nvmloads);
+#endif
 }
 
 int stop_perf_monitoring(){
