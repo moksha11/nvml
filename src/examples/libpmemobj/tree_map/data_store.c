@@ -174,8 +174,10 @@ int main(int argc, const char *argv[]) {
 	/* remove half the items without outer transaction */
 	//for (int i = 0; i < nkeys/2; ++i) {
 	for (int i = 0; i < nkeys; ++i) {
+	 //TX_BEGIN(pop) {
 		PMEMoid item = tree_map_remove(pop, D_RO(root)->map, keys[i]);
 		assert(!OID_IS_NULL(item));
+	  //} TX_END
 		assert(OID_INSTANCEOF(item, struct store_item));
 	}
 #endif

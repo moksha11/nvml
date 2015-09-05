@@ -115,7 +115,7 @@ int tx_set_log_mode() {
 #define RELAX_LOGGING 1
 #define EAP_UNDO_MAX 4096
 /*Threshold in terms of percentage*/
-#define EAP_BUDGET_THRESHOLD 100
+#define EAP_BUDGET_THRESHOLD 500
 
 long long instr_budget =2003141586;
 long long llcstoremiss_budget =4004458;
@@ -130,7 +130,7 @@ int nr_txcount=0;
 int nr_txcount_start=0;
 int first_epoch=1;
 uint64_t nr_eap_undo_count;
-int nxt_epoch_log_mode=TX_LOG_NODATA;
+int nxt_epoch_log_mode=TX_LOG_UNDO_FULL;
 
 struct eap_undo_record {
 	PMEMoid eap_undo_oid;
@@ -246,7 +246,7 @@ void tx_start_monitoring(){
 		nr_txcount = 1;
 
 		if(first_epoch) {
-			nxt_epoch_log_mode = TX_LOG_UNDO_FULL;
+			nxt_epoch_log_mode = TX_LOG_NODATA;
 		}
 	}
 }
