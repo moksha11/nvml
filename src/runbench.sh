@@ -36,7 +36,7 @@ RUNEXPERIMENT() {
 		FlushDisk
 		cd $APPBASE
 		#/home/sudarsun/Dropbox/nvml/src/killer.sh &
-		$APP_PREFIX "taskset --cpu-list 4,5,6,7 $APP $INPUTFILE"
+		$APP_PREFIX "taskset --cpu-list 4,5 $APP $INPUTFILE"
 		#taskset --cpu-list 4,5,6,7 $APP $INPUTFILE
 		#gprof "$APP $INPUTFILE"
 		#gprof $APP
@@ -67,7 +67,7 @@ echo " "
 APPBASE=$BASE/hashset
 APP=$APPBASE/hashset_tx
 PARAM=$1
-#RUNEXPERIMENT
+RUNEXPERIMENT
 #exit
 
 echo "**********BINARY TREE**************"

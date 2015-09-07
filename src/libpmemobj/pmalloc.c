@@ -367,13 +367,6 @@ pfree_eap(PMEMobjpool *pop, uint64_t *off)
 	if ((err = heap_lock_if_run(pop, m)) != 0)
 		return err;
 
-
-#ifdef _EAP_ALLOC_OPTIMIZE
-		//fprintf(stderr,"_EAP_ALLOC_OPTIMIZE\n");
-	//return 0;
-#endif
-
-
 	uint64_t op_result;
 	void *hdr;
 	struct memory_block res = heap_free_block(pop, b, m, &hdr, &op_result);
@@ -381,7 +374,6 @@ pfree_eap(PMEMobjpool *pop, uint64_t *off)
 
 	}
 
-#if 1
 	struct lane_section *lane;
 	if ((err = lane_hold(pop, &lane, LANE_SECTION_ALLOCATOR)) != 0)
 		goto error_lane_hold;
@@ -412,26 +404,19 @@ pfree_eap(PMEMobjpool *pop, uint64_t *off)
 		ERR("Failed to update the heap volatile state");
 		ASSERT(0);
 	}
-#endif
-
 
 	if (heap_unlock_if_run(pop, m) != 0) {
 		ERR("Failed to release run lock");
 		ASSERT(0);
 	}
 
-#if 1
 	if (bucket_is_small(b) && heap_degrade_run_if_empty(pop, b, res) != 0) {
 		ERR("Failed to degrade run");
 		ASSERT(0);
 	}
-#endif
-
 	return 0;
 
-#if 1
 error_lane_hold:
-#endif
 	if (heap_unlock_if_run(pop, m) != 0) {
 		ERR("Failed to release run lock");
 		ASSERT(0);

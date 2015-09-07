@@ -263,6 +263,9 @@ pmem_has_hw_drain(void)
 static void
 predrain_fence_empty(void)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(15, NULL);
 
 	VALGRIND_DO_FENCE;
@@ -275,6 +278,9 @@ predrain_fence_empty(void)
 static void
 predrain_fence_sfence(void)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(15, NULL);
 
 	_mm_sfence();	/* ensure CLWB or CLFLUSHOPT completes before PCOMMIT */
@@ -296,6 +302,9 @@ static void (*Func_predrain_fence)(void) = predrain_fence_empty;
 static void
 drain_no_pcommit(void)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(15, NULL);
 
 	Func_predrain_fence();
@@ -311,6 +320,9 @@ drain_no_pcommit(void)
 static void
 drain_pcommit(void)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(15, NULL);
 
 	Func_predrain_fence();
@@ -335,6 +347,9 @@ static void (*Func_drain)(void) = drain_no_pcommit;
 void
 pmem_drain(void)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(10, NULL);
 
 	Func_drain();
@@ -346,6 +361,9 @@ pmem_drain(void)
 static void
 flush_clflush(void *addr, size_t len)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(15, "addr %p len %zu", addr, len);
 
 	uintptr_t uptr;
@@ -367,6 +385,9 @@ flush_clflush(void *addr, size_t len)
 static void
 flush_clwb(void *addr, size_t len)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(15, "addr %p len %zu", addr, len);
 
 	uintptr_t uptr;
@@ -389,6 +410,9 @@ flush_clwb(void *addr, size_t len)
 static void
 flush_clflushopt(void *addr, size_t len)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(15, "addr %p len %zu", addr, len);
 
 	uintptr_t uptr;
@@ -420,6 +444,9 @@ static void (*Func_flush)(void *, size_t) = flush_clflush;
 void
 pmem_flush(void *addr, size_t len)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(10, "addr %p len %zu", addr, len);
 
 	Func_flush(addr, len);
@@ -431,6 +458,9 @@ pmem_flush(void *addr, size_t len)
 void
 pmem_persist(void *addr, size_t len)
 {
+#ifdef _DISABLE_PERSIST
+        return;
+#endif
 	LOG(15, "addr %p len %zu", addr, len);
 
 	pmem_flush(addr, len);
@@ -447,6 +477,11 @@ pmem_persist(void *addr, size_t len)
 int
 pmem_msync(void *addr, size_t len)
 {
+
+#ifdef _DISABLE_PERSIST
+	return 0;
+#endif 
+
 	LOG(15, "addr %p len %zu", addr, len);
 	/*
 	 * msync requires len to be a multiple of pagesize, so

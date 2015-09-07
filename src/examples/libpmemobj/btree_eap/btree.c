@@ -46,7 +46,7 @@ POBJ_LAYOUT_TOID(btree, struct btree_node);
 POBJ_LAYOUT_END(btree);
 
 #define	POOLSIZE 1024*1024*1024
-#define ITEM_COUNT 500000
+#define ITEM_COUNT 1000000
 #define	KEYLEN 64
 #define	VALUELEN 64
 

@@ -104,7 +104,9 @@ static void *
 nopmem_memcpy_persist(void *dest, const void *src, size_t len)
 {
 	memcpy(dest, src, len);
+#ifndef _DISABLE_PERSIST
 	pmem_msync(dest, len);
+#endif
 	return dest;
 }
 
@@ -115,7 +117,9 @@ static void *
 nopmem_memset_persist(void *dest, int c, size_t len)
 {
 	memset(dest, c, len);
+#ifndef _DISABLE_PERSIST
 	pmem_msync(dest, len);
+#endif
 	return dest;
 }
 

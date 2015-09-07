@@ -115,7 +115,7 @@ int tx_set_log_mode() {
 #define RELAX_LOGGING 1
 #define EAP_UNDO_MAX 4096
 /*Threshold in terms of percentage*/
-#define EAP_BUDGET_THRESHOLD 500
+#define EAP_BUDGET_THRESHOLD 200
 
 long long instr_budget =2003141586;
 long long llcstoremiss_budget =4004458;
@@ -146,7 +146,7 @@ int currtype;
 int tx_is_relaxedlog(){
 
 #if defined(_EAP_METADATA_ONLY) || defined(_EAP_FLUSH_ONLY)
-	fprintf(stdout,"relaxed log \n");
+	//fprintf(stdout,"relaxed log \n");
 	return 1;
 #endif
 
@@ -543,7 +543,7 @@ tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 		VALGRIND_SET_CLEAN(oobh, size);
 #endif
 
-#ifdef _EAP_ALLOC_OPTIMIZE
+#if 0 //def _EAP_ALLOC_OPTIMIZE
 		ret = list_remove_free_eap(pop, head,
 				0, NULL, &obj, 1);
 #else
