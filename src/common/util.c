@@ -124,6 +124,9 @@ util_set_alloc_funcs(void *(*malloc_func)(size_t size),
 	LOG(3, "malloc %p free %p realloc %p strdup %p",
 			malloc_func, free_func, realloc_func, strdup_func);
 
+	if(malloc_func) printf("malloc_func not null \n");
+	else printf("malloc_func null \n");
+
 	Malloc = (malloc_func == NULL) ? malloc : malloc_func;
 	Free = (free_func == NULL) ? free : free_func;
 	Realloc = (realloc_func == NULL) ? realloc : realloc_func;

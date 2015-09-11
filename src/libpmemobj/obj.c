@@ -556,7 +556,7 @@ pmemobj_close(PMEMobjpool *pop)
 	}
 
 	pmemobj_cleanup(pop);
-#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY) || defined(_EAP_ALLOC_OPTIMIZE)
 	print_stats();
 #endif
 }

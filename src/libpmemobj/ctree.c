@@ -110,8 +110,9 @@ ctree_delete(struct ctree *t)
 
 	if ((errno = pthread_mutex_destroy(&t->lock)) != 0)
 		ERR("!pthread_mutex_destroy");
-
+//#ifndef _EAP_ALLOC_OPTIMIZE
 	Free(t);
+//#endif
 }
 
 /*
@@ -150,7 +151,7 @@ ctree_insert(struct ctree *t, uint64_t key)
 	struct node *n = Malloc(sizeof (*n)); /* internal node */
 	if (n == NULL) {
 		err = ENOMEM;
-		goto error_internal_malloc;
+		goto error_internal_Malloc;
 	}
 
 	if (dstkey == key) {
@@ -184,7 +185,7 @@ out:
 
 	return err;
 
-error_internal_malloc:
+error_internal_Malloc:
 	Free(kp);
 error_duplicate:
 	Free(n);

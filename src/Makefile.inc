@@ -45,7 +45,7 @@ vpath %.c $(COMMON)
 
 INCS += -I../include -I../common/
 
-CFLAGS += -std=gnu99 -Wall -Werror -pthread $(EXTRA_CFLAGS)
+CFLAGS += -std=gnu99 -Wall -pthread $(EXTRA_CFLAGS) -Werror 
 CFLAGS += -DSRCVERSION=\"$(SRCVERSION)\"
 
 LDFLAGS += -Wl,-z,relro $(EXTRA_LDFLAGS)
@@ -76,7 +76,7 @@ endif
 
 LIBS_DESTDIR = $(DESTDIR)/$(LIBDIR)/$(LIBS_DIR)
 
-EAPFLAGS=-D_EAP_ALLOC_OPTIMIZE #-D_EAP_FLUSH_ONLY -D_DISABLE_PERSIST
+EAPFLAGS=-D_DISABLE_LOGGING #-D_EAP_FLUSH_ONLY
 CFLAGS += $(EAPFLAGS)
 
 ifeq ($(DEBUG),1)

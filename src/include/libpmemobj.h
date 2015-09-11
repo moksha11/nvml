@@ -769,6 +769,7 @@ enum pobj_tx_logtype {
 
 enum pobj_tx_logtype pmemobj_tx_logtype();
 int tx_is_relaxedlog();
+int is_alloc_free_opt_enable(size_t);
 
 /*
  * Always returns the current transaction stage for a thread.

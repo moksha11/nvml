@@ -36,7 +36,9 @@ RUNEXPERIMENT() {
 		FlushDisk
 		cd $APPBASE
 		#/home/sudarsun/Dropbox/nvml/src/killer.sh &
-		$APP_PREFIX "taskset --cpu-list 4,5 $APP $INPUTFILE"
+		#$APP_PREFIX "LD_PRELOAD=/usr/lib/libhoard.so taskset --cpu-list 4,5 $APP $INPUTFILE"
+		$APP_PREFIX "$APP $INPUTFILE"
+		#LD_PRELOAD=/usr/lib/libhoard.so $APP $INPUTFILE
 		#taskset --cpu-list 4,5,6,7 $APP $INPUTFILE
 		#gprof "$APP $INPUTFILE"
 		#gprof $APP
@@ -57,8 +59,8 @@ echo " "
 APPBASE=$BASE/tree_map
 APP=$APPBASE/data_store_btree
 PARAM=$1
-RUNEXPERIMENT
-exit
+#RUNEXPERIMENT
+#exit
 
 echo "**********HASHSET**************"
 echo " "
@@ -67,7 +69,7 @@ echo " "
 APPBASE=$BASE/hashset
 APP=$APPBASE/hashset_tx
 PARAM=$1
-RUNEXPERIMENT
+#RUNEXPERIMENT
 #exit
 
 echo "**********BINARY TREE**************"
@@ -77,8 +79,8 @@ echo " "
 APPBASE=$BASE/btree_eap
 APP=$APPBASE/btree
 PARAM=$1
-RUNEXPERIMENT
-exit
+#RUNEXPERIMENT
+#exit
 
 echo "**********SNAPPY*************"
 echo " "
@@ -87,4 +89,17 @@ echo " "
 APPBASE=$BASE/snappy
 APP=$APPBASE/run_snappy.sh
 cd $APPBASE
-$APP 0
+#$APP 0
+
+echo "**********JPEG*************"
+echo " "
+echo " "
+echo " "
+APPBASE=$BASE/jpeg-6b
+APP=$APPBASE/run_jpeg.sh
+cd $APPBASE
+echo $PWD
+$APP 1
+
+
+

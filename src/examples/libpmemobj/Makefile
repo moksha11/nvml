@@ -36,7 +36,7 @@
 PROGS = manpage btree pi
 DIRS = pminvaders pmemlog pmemblk string_store string_store_tx\
 	string_store_tx_type hashset tree_map tree_map_notx snappy \
-	btree_eap
+	btree_eap jpeg-6b
 
 INCDIR ?= ../../include
 LIBDIR ?= ../../debug

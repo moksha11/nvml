@@ -110,12 +110,41 @@ int tx_set_log_mode() {
 }
 #endif
 
+
+int nr_txcount_start=0;
+
+#if defined(_EAP_ALLOC_OPTIMIZE)
+#define EAP_ALLOC_GARBASE_FREQ 100000
+int eap_alloc_free_opt=0;
+size_t nr_data_notfreed=0;
+uint64_t numfreereqst=1;
+
+int is_alloc_free_opt_enable(size_t size){
+
+	/*Alternate between eap_alloc optimizations*/
+	if(numfreereqst && numfreereqst % EAP_ALLOC_GARBASE_FREQ == 0) {
+		/*if(eap_alloc_free_opt) {
+			eap_alloc_free_opt = 0;
+		}else*/ {
+			//fprintf(stderr,"eap_alloc_free_opt %d \n",eap_alloc_free_opt);
+			eap_alloc_free_opt = 1;
+		}	
+	}
+	numfreereqst++;
+
+	if(eap_alloc_free_opt) {
+		nr_data_notfreed += size;	
+	}
+	return eap_alloc_free_opt;
+}
+#endif
+
 #if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
 #define MONITORINGFREQ 10000
 #define RELAX_LOGGING 1
 #define EAP_UNDO_MAX 4096
 /*Threshold in terms of percentage*/
-#define EAP_BUDGET_THRESHOLD 200
+#define EAP_BUDGET_THRESHOLD 50
 
 long long instr_budget =2003141586;
 long long llcstoremiss_budget =4004458;
@@ -127,7 +156,6 @@ int prev_log_mode=0;
 int nr_relaxed_logs=0;
 int nr_completed_logs=0;
 int nr_txcount=0;
-int nr_txcount_start=0;
 int first_epoch=1;
 uint64_t nr_eap_undo_count;
 int nxt_epoch_log_mode=TX_LOG_UNDO_FULL;
@@ -239,6 +267,7 @@ void tx_start_monitoring(){
 #if defined(_EAP_METADATA_ONLY) || defined(_EAP_FLUSH_ONLY)
 	return;
 #endif
+	nr_txcount_start++;
 
 	if(!nr_txcount) {
 		start_perf_monitoring();
@@ -256,9 +285,6 @@ void tx_stop_monitoring(){
 #if defined(_EAP_METADATA_ONLY) || defined(_EAP_FLUSH_ONLY)
 	return;
 #endif
-
-	nr_txcount_start++;
-
 	if(nr_txcount_start % MONITORINGFREQ == 0) {
 		stop_perf_monitoring();
 		/*By this time we know the CPU instructions and
@@ -269,11 +295,6 @@ void tx_stop_monitoring(){
 	}
 }
 
-void print_stats(){
-	fprintf(stdout,"nr_relaxed_logs %u "
-			"nr_completed_logs %u \n",
-			nr_relaxed_logs, nr_completed_logs);
-}
 
 /*
  * pmemobj_tx_add_eap_undolog -- adds persistent memory range into the eap's UNDO
@@ -332,6 +353,21 @@ pmemobj_tx_persist_eap_undolog(PMEMobjpool *pop) {
 	return 0;
 }
 #endif
+
+void print_stats(){
+#if defined(_DISABLE_LOGGING) || defined(_EAP_FLUSH_ONLY)
+	fprintf(stdout,"nr_relaxed_logs %u "
+			"nr_completed_logs %u \n",
+			nr_relaxed_logs, nr_completed_logs);
+#else
+#if defined(_EAP_ALLOC_OPTIMIZE)
+	fprintf(stdout,"nr_data_notfreed %zu \n",
+			nr_data_notfreed);
+#endif
+#endif
+}
+
+
 
 
 /*
@@ -543,14 +579,16 @@ tx_clear_undo_log(PMEMobjpool *pop, struct list_head *head)
 		VALGRIND_SET_CLEAN(oobh, size);
 #endif
 
-#if 0 //def _EAP_ALLOC_OPTIMIZE
-		ret = list_remove_free_eap(pop, head,
-				0, NULL, &obj, 1);
-#else
+#ifdef _EAP_ALLOC_OPTIMIZE
+		//ret = list_remove_free_eap(pop, head,
+		//		0, NULL, &obj, 1);
+		if(obj.off)
+		ret=0;//return 0; 	
+#endif
 		/* remove and free all elements from undo log */
 		ret = list_remove_free(pop, head,
 				0, NULL, &obj);
-#endif
+//#endif
 
 		ASSERTeq(ret, 0);
 		if (ret) {

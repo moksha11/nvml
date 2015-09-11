@@ -443,7 +443,13 @@ pfree(PMEMobjpool *pop, uint64_t *off)
 
 #ifdef _EAP_ALLOC_OPTIMIZE
 		//fprintf(stderr,"_EAP_ALLOC_OPTIMIZE\n");
-		goto error_lane_hold;
+		if(is_alloc_free_opt_enable(alloc->size))
+		{
+			goto error_lane_hold;		
+			//goto temphere;
+		}else {
+			//printf("Relaxing allocs %zu\n", alloc->size);	
+		}
 #endif
 
 	uint64_t op_result;
@@ -469,6 +475,15 @@ pfree(PMEMobjpool *pop, uint64_t *off)
 		ERR("Failed to release the lane");
 		ASSERT(0);
 	}
+
+#ifdef _EAP_ALLOC_OPTIMIZE
+	goto temphere;
+	temphere:
+//		if(is_alloc_free_opt_enable(alloc->size))
+//			goto error_lane_hold;
+#endif
+
+
 	/*
 	 * There's no point in rolling back redo log changes because the
 	 * volatile errors don't break the persistent state.

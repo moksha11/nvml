@@ -48,7 +48,8 @@ POBJ_LAYOUT_ROOT(data_store, struct store_root);
 POBJ_LAYOUT_TOID(data_store, struct store_item);
 POBJ_LAYOUT_END(data_store);
 
-#define	MAX_INSERTS 500000
+#define	MAX_INSERTS 90000
+#define ENABLE_RESTART
 
 static uint64_t nkeys;
 static uint64_t keys[MAX_INSERTS];
@@ -126,6 +127,11 @@ int main(int argc, const char *argv[]) {
 		}
 #ifdef ENABLE_RESTART
 		fprintf(stderr,"Restart nkeys %lu\n", nkeys);
+		if(nkeys < MAX_INSERTS/2) {
+			fprintf(stderr,"Restart Failed for nkeys %lu\n", nkeys);			
+		}else if(nkeys == MAX_INSERTS/2) {
+			fprintf(stderr,"Restart succeeded for nkeys %lu\n", nkeys);
+		}
 		exit(0);
 #endif
 	}
@@ -148,6 +154,7 @@ int main(int argc, const char *argv[]) {
 		} TX_END
 
 	}
+	//goto endtrans;
 
 #ifndef ENABLE_RESTART
 	/* count the items */
@@ -161,7 +168,6 @@ int main(int argc, const char *argv[]) {
 	}
 
 	uint64_t old_nkeys = nkeys;
-
 	/* tree should be empty */
 	tree_map_foreach(D_RO(root)->map, dec_keys, NULL);
 	assert(old_nkeys == nkeys);
@@ -170,19 +176,15 @@ int main(int argc, const char *argv[]) {
 	tree_map_foreach(D_RO(root)->map, get_keys, NULL);
 	//nkeys = MAX_INSERTS-1;
 	printf("Number of keys to remove %lu \n",nkeys);
-
 	/* remove half the items without outer transaction */
-	//for (int i = 0; i < nkeys/2; ++i) {
-	for (int i = 0; i < nkeys; ++i) {
-	 //TX_BEGIN(pop) {
+	for (int i = 0; i < nkeys/2; ++i) {
 		PMEMoid item = tree_map_remove(pop, D_RO(root)->map, keys[i]);
 		assert(!OID_IS_NULL(item));
-	  //} TX_END
 		assert(OID_INSTANCEOF(item, struct store_item));
 	}
 #endif
-
-
+	goto endtrans;
+endtrans:
 	pmemobj_close(pop);
 
 	return 0;
